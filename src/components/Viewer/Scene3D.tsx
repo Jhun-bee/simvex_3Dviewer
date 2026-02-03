@@ -8,8 +8,9 @@
  */
 
 import { Suspense, useRef, useEffect } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, Html } from '@react-three/drei';
+import * as THREE from 'three';
 import { Machinery } from '../../types';
 import ModelGroup from './ModelGroup';
 import { useViewerStore } from '../../stores/viewerStore';
@@ -31,17 +32,17 @@ export default function Scene3D({ machinery }: Scene3DProps) {
 
   // 🎣 Hook 2: 카메라 컨트롤 설정 (도영님)
   const { controlsConfig } = useOrbitControls();
-  const { resetTrigger } = useViewerStore();
+  const { resetTrigger, cameraPosition, cameraTarget } = useViewerStore();
   const controlsRef = useRef<any>(null);
-
-  useEffect(() => {
-    if (controlsRef.current) {
-      controlsRef.current.reset();
-    }
-  }, [resetTrigger]);
 
   return (
     <Canvas shadows>
+      <CameraController
+        controlsRef={controlsRef}
+        targetPosition={cameraPosition}
+        targetLookAt={cameraTarget}
+        resetTrigger={resetTrigger}
+      />
       <PerspectiveCamera makeDefault position={[100, 100, 100]} fov={50} />
 
       {/* 조명 (설정값은 Hook에서) */}
@@ -102,4 +103,36 @@ export default function Scene3D({ machinery }: Scene3DProps) {
       {showGrid !== false && <gridHelper args={[200, 40, 0x888888, 0xcccccc]} />}
     </Canvas>
   );
+}
+
+/**
+ * 카메라 애니메이션을 제어하는 내부 컴포넌트
+ */
+function CameraController({ controlsRef, targetPosition, targetLookAt, resetTrigger }: any) {
+  const { camera } = useThree();
+  const vec = new THREE.Vector3();
+  const targetVec = new THREE.Vector3();
+
+  useFrame(() => {
+    // 1. 카메라 위치 보간 (lerp)
+    if (targetPosition) {
+      camera.position.lerp(vec.set(targetPosition[0], targetPosition[1], targetPosition[2]), 0.05);
+    }
+
+    // 2. 컨트롤 타겟(중점) 보간
+    if (controlsRef.current && targetLookAt) {
+      controlsRef.current.target.lerp(targetVec.set(targetLookAt[0], targetLookAt[1], targetLookAt[2]), 0.05);
+      controlsRef.current.update();
+    }
+  });
+
+  // 리셋 트리거 발생 시 즉시 처리할 작업 (선택 사항)
+  useEffect(() => {
+    if (resetTrigger > 0 && controlsRef.current) {
+      console.log('🔄 카메라 뷰 리셋 실행');
+      // Lerp가 이미 하고 있으므로 별도 즉시 이동은 생략하거나 damping 조정 가능
+    }
+  }, [resetTrigger, controlsRef]);
+
+  return null;
 }

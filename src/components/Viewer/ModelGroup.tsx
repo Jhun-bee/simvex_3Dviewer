@@ -7,7 +7,7 @@
  * - Three.js 로직은 모두 Hook으로 분리
  */
 
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Machinery } from '../../types';
@@ -27,10 +27,46 @@ export default function ModelGroup({ machinery, physicsEnabled }: ModelGroupProp
   const groupRef = useRef<THREE.Group>(null);
 
   // Zustand Store
-  const { explodeFactor, selectedPart, setSelectedPart } = useViewerStore();
+  const {
+    explodeFactor,
+    selectedPart,
+    setSelectedPart,
+    setCameraPosition,
+    setCameraTarget
+  } = useViewerStore();
 
   // 🎣 Hook 1: 모델 로딩 (공통)
   const { models, originalPositions, isLoading, error } = useModelLoader(machinery);
+
+  // 📦 부품 선택 시 카메라 자동 포커스 효과
+  useEffect(() => {
+    if (selectedPart && models.has(selectedPart)) {
+      const model = models.get(selectedPart);
+      if (!model) return;
+
+      // 1. 부품의 바운딩 박스 계산
+      const box = new THREE.Box3().setFromObject(model);
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+
+      const size = new THREE.Vector3();
+      box.getSize(size);
+      const maxDim = Math.max(size.x, size.y, size.z);
+
+      // 2. 적절한 카메라 거리 계산 (부품 크기의 약 2~3배)
+      const distance = Math.max(maxDim * 2.5, 30);
+
+      console.log(`🎯 [ModelGroup] '${selectedPart}' 포커스 계산:`, center, distance);
+
+      // 3. 스토어 업데이트 -> CameraController가 lerp 애니메이션 수행
+      setCameraTarget([center.x, center.y, center.z]);
+      setCameraPosition([
+        center.x + distance * 0.7,
+        center.y + distance * 0.7,
+        center.z + distance * 0.7
+      ]);
+    }
+  }, [selectedPart, models, setCameraTarget, setCameraPosition]);
 
   // 🎣 Hook 2: 애니메이션 (상진님)
   const {
