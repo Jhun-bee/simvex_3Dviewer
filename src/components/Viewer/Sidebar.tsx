@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ChevronRight, ChevronLeft, FileText, MessageSquare, Brain, Download } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChevronRight, ChevronLeft, FileText, MessageSquare, Brain } from 'lucide-react';
 import NotePanel from '../Notes/NotePanel';
 import AIPanel from '../AI/AIPanel';
 import QuizPanel from '../Quiz/QuizPanel';
@@ -20,18 +20,26 @@ export default function Sidebar({ machineryId, isOpen, onToggle }: SidebarProps)
   const { getNotesByMachinery } = useNoteStore();
   const { getMessagesByMachinery } = useAIStore();
 
-  const handleExportPDF = async () => {
-    const viewerElement = document.getElementById('viewer-canvas');
-    if (!viewerElement) return;
+  // Listen for PDF export event from Header menu
+  useEffect(() => {
+    const handleExportPDF = async () => {
+      const viewerElement = document.getElementById('viewer-canvas');
+      if (!viewerElement) return;
 
-    const notes = getNotesByMachinery(machineryId)
-      .map(n => n.content)
-      .join('\n\n');
+      const notes = getNotesByMachinery(machineryId)
+        .map(n => n.content)
+        .join('\n\n');
 
-    const aiMessages = getMessagesByMachinery(machineryId);
+      const aiMessages = getMessagesByMachinery(machineryId);
 
-    await generatePDF(machineryId, viewerElement, notes, aiMessages);
-  };
+      await generatePDF(machineryId, viewerElement, notes, aiMessages);
+    };
+
+    window.addEventListener('simvex:exportPDF', handleExportPDF);
+    return () => {
+      window.removeEventListener('simvex:exportPDF', handleExportPDF);
+    };
+  }, [machineryId, getNotesByMachinery, getMessagesByMachinery]);
 
   return (
     <>
@@ -83,22 +91,11 @@ export default function Sidebar({ machineryId, isOpen, onToggle }: SidebarProps)
           </button>
         </div>
 
-        {/* Content */}
+        {/* Content - now takes full remaining space without bottom button */}
         <div className="flex-1 overflow-hidden">
           {activeTab === 'note' && <NotePanel machineryId={machineryId} />}
           {activeTab === 'ai' && <AIPanel machineryId={machineryId} />}
           {activeTab === 'quiz' && <QuizPanel machineryId={machineryId} />}
-        </div>
-
-        {/* PDF Export */}
-        <div className="border-t p-4">
-          <button
-            onClick={handleExportPDF}
-            className="w-full py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
-          >
-            <Download className="w-5 h-5" />
-            <span>PDF 출력</span>
-          </button>
         </div>
       </div>
     </>

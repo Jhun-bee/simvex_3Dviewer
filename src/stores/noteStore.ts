@@ -4,29 +4,33 @@ import { Note } from '../types';
 
 interface NoteStore {
   notes: Note[];
-  addNote: (machineryId: string, content: string) => void;
-  updateNote: (id: string, content: string) => void;
+  addNote: (machineryId: string, content: string, partName?: string) => void;
+  updateNote: (id: string, content: string, partName?: string) => void;
   deleteNote: (id: string) => void;
   getNotesByMachinery: (machineryId: string) => Note[];
+  getNotesByPart: (machineryId: string, partName: string) => Note[];
 }
 
 export const useNoteStore = create<NoteStore>()(
   persist(
     (set, get) => ({
       notes: [],
-      addNote: (machineryId, content) => {
+      addNote: (machineryId, content, partName) => {
         const newNote: Note = {
           id: Date.now().toString(),
           machineryId,
           content,
           timestamp: Date.now(),
+          partName,
         };
         set((state) => ({ notes: [...state.notes, newNote] }));
       },
-      updateNote: (id, content) => {
+      updateNote: (id, content, partName) => {
         set((state) => ({
           notes: state.notes.map((note) =>
-            note.id === id ? { ...note, content, timestamp: Date.now() } : note
+            note.id === id
+              ? { ...note, content, timestamp: Date.now(), ...(partName !== undefined && { partName }) }
+              : note
           ),
         }));
       },
@@ -37,6 +41,11 @@ export const useNoteStore = create<NoteStore>()(
       },
       getNotesByMachinery: (machineryId) => {
         return get().notes.filter((note) => note.machineryId === machineryId);
+      },
+      getNotesByPart: (machineryId, partName) => {
+        return get().notes.filter(
+          (note) => note.machineryId === machineryId && note.partName === partName
+        );
       },
     }),
     {
