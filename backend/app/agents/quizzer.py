@@ -1,0 +1,162 @@
+"""Quizzer Agent - Generates quizzes and provides feedback."""
+
+import json
+import re
+
+from app.agents.base import BaseAgent
+from app.agents.prompts import (
+    QUIZZER_SYSTEM_PROMPT,
+    QUIZ_GENERATION_PROMPT,
+    QUIZ_FEEDBACK_PROMPT,
+)
+from app.data.machinery import get_machinery_context
+from app.data.quiz_bank import get_questions_by_machinery
+
+
+class QuizzerAgent(BaseAgent):
+    """Agent that generates quizzes and provides feedback in Korean."""
+
+    def __init__(self):
+        super().__init__(temperature=0.7)
+
+    async def invoke(self, *args, **kwargs) -> str:
+        """Generic invoke - use specific methods instead."""
+        raise NotImplementedError("Use generate_quiz or grade_answer methods")
+
+    async def generate_quiz(
+        self,
+        machinery_id: str,
+        count: int = 3,
+        quiz_accuracy: float = 0.5,
+        exclude_ids: list[str] = None,
+    ) -> list[dict]:
+        """
+        Generate quiz questions for a machinery.
+
+        Args:
+            machinery_id: The machinery to generate questions for
+            count: Number of questions to generate
+            quiz_accuracy: User's current accuracy (0-1) for adaptive difficulty
+            exclude_ids: Question IDs to exclude (already answered)
+
+        Returns:
+            List of quiz questions
+        """
+        exclude_ids = exclude_ids or []
+
+        # First, get questions from the quiz bank
+        bank_questions = get_questions_by_machinery(machinery_id)
+        available_bank_questions = [
+            q for q in bank_questions if q["id"] not in exclude_ids
+        ]
+
+        questions = []
+
+        # Use bank questions first
+        for q in available_bank_questions[:count]:
+            questions.append({
+                "id": q["id"],
+                "question": q["question"],
+                "options": q["options"],
+                "correct_answer": q["correct_answer"],
+                "machinery_id": machinery_id,
+            })
+
+        # If we need more questions, generate with LLM
+        remaining = count - len(questions)
+        if remaining > 0:
+            generated = await self._generate_with_llm(
+                machinery_id, remaining, quiz_accuracy
+            )
+            questions.extend(generated)
+
+        return questions[:count]
+
+    async def _generate_with_llm(
+        self,
+        machinery_id: str,
+        count: int,
+        quiz_accuracy: float,
+    ) -> list[dict]:
+        """Generate questions using LLM."""
+        # Determine difficulty based on accuracy
+        if quiz_accuracy < 0.4:
+            difficulty = "쉬움 (기본 개념 위주)"
+        elif quiz_accuracy < 0.7:
+            difficulty = "보통 (응용 문제 포함)"
+        else:
+            difficulty = "어려움 (심화 문제)"
+
+        machinery_context = get_machinery_context(machinery_id)
+
+        prompt = QUIZ_GENERATION_PROMPT.format(
+            count=count,
+            machinery_context=machinery_context,
+            difficulty=difficulty,
+        )
+
+        messages = self._build_messages(
+            system_prompt=QUIZZER_SYSTEM_PROMPT,
+            user_message=prompt,
+        )
+
+        response = await self.llm.ainvoke(messages)
+
+        # Parse JSON response
+        try:
+            # Extract JSON array from response
+            content = self._extract_text(response.content)
+            # Find JSON array in response
+            json_match = re.search(r'\[[\s\S]*\]', content)
+            if json_match:
+                questions = json.loads(json_match.group())
+                # Add IDs and machinery_id to generated questions
+                for i, q in enumerate(questions):
+                    q["id"] = f"gen_{machinery_id}_{i}_{hash(q['question']) % 10000}"
+                    q["machinery_id"] = machinery_id
+                return questions
+        except json.JSONDecodeError:
+            pass
+
+        return []
+
+    async def grade_answer(
+        self,
+        question: str,
+        options: list[str],
+        selected_answer: int,
+        correct_answer: int,
+    ) -> str:
+        """
+        Grade an answer and provide feedback.
+
+        Returns:
+            Feedback string in Korean
+        """
+        is_correct = selected_answer == correct_answer
+        result = "정답" if is_correct else "오답"
+
+        prompt = QUIZ_FEEDBACK_PROMPT.format(
+            question=question,
+            options=", ".join(f"{i}. {opt}" for i, opt in enumerate(options)),
+            selected_answer=selected_answer,
+            selected_text=options[selected_answer] if 0 <= selected_answer < len(options) else "없음",
+            correct_answer=correct_answer,
+            correct_text=options[correct_answer] if 0 <= correct_answer < len(options) else "없음",
+            result=result,
+        )
+
+        messages = self._build_messages(
+            system_prompt=QUIZZER_SYSTEM_PROMPT,
+            user_message=prompt,
+        )
+
+        response = await self.llm.ainvoke(messages)
+        feedback = self._extract_text(response.content)
+        # Fallback if feedback extraction fails
+        if not feedback:
+            if is_correct:
+                feedback = "정답입니다! 잘 하셨습니다."
+            else:
+                feedback = f"오답입니다. 정답은 {correct_answer + 1}번 '{options[correct_answer]}'입니다."
+        return feedback
