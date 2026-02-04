@@ -1,6 +1,7 @@
 """Chat endpoints for the Explainer agent."""
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database import get_db
@@ -8,6 +9,7 @@ from app.models.schemas import ChatRequest, ChatResponse
 from app.agents.explainer import ExplainerAgent
 from app.services.progress_service import ProgressService
 from app.data.machinery import get_machinery
+from app.utils.rate_limiter import RateLimitExceeded
 
 router = APIRouter()
 
@@ -44,6 +46,7 @@ async def chat_with_explainer(
             machinery_id=machinery_id,
             user_message=request.message,
             conversation_history=history,
+            user_id=request.user_id,
         )
 
         # Track progress if user_id provided
@@ -61,5 +64,11 @@ async def chat_with_explainer(
             topics_discussed=topics,
         )
 
+    except RateLimitExceeded as e:
+        return JSONResponse(
+            status_code=429,
+            content={"detail": e.message},
+            headers={"Retry-After": str(int(e.retry_after))},
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Chat error: {str(e)}")

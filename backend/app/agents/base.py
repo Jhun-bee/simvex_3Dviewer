@@ -5,6 +5,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 
 from app.config import get_settings
+from app.utils.rate_limiter import get_rate_limiter
 
 
 class BaseAgent(ABC):
@@ -23,11 +24,28 @@ class BaseAgent(ABC):
             api_key=settings.openai_api_key,
             use_responses_api=use_responses,
         )
+        self._rate_limiter = get_rate_limiter()
 
     @abstractmethod
     async def invoke(self, *args, **kwargs) -> str:
         """Invoke the agent with input."""
         pass
+
+    async def _invoke_llm(self, messages: list, user_id: str = None):
+        """
+        Invoke LLM with rate limiting and retry logic.
+
+        Args:
+            messages: List of messages to send to the LLM
+            user_id: Optional user ID for per-user rate limiting
+
+        Returns:
+            LLM response
+        """
+        async def _call():
+            return await self.llm.ainvoke(messages)
+
+        return await self._rate_limiter.execute_with_retry(_call, user_id)
 
     def _build_messages(
         self,

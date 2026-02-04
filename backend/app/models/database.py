@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import Optional
-from sqlalchemy import String, Integer, Float, Text, DateTime, ForeignKey, JSON
+from sqlalchemy import String, Integer, Float, Text, DateTime, ForeignKey, JSON, Boolean
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.pool import NullPool, QueuePool
 
 from app.config import get_settings
 
@@ -65,7 +66,7 @@ class QuizAttempt(Base):
     question_text: Mapped[str] = mapped_column(Text)
     selected_answer: Mapped[int] = mapped_column(Integer)
     correct_answer: Mapped[int] = mapped_column(Integer)
-    is_correct: Mapped[bool] = mapped_column(Integer)  # SQLite doesn't have boolean
+    is_correct: Mapped[bool] = mapped_column(Boolean)
     attempted_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
@@ -83,11 +84,30 @@ class GeneratedQuiz(Base):
 
 
 # Database engine and session
-engine = create_async_engine(
-    get_settings().database_url,
-    echo=get_settings().debug,
-)
+def _create_engine():
+    """Create async engine with appropriate pooling for the database type."""
+    settings = get_settings()
 
+    if settings.is_postgres:
+        # PostgreSQL: use connection pooling for concurrent access
+        return create_async_engine(
+            settings.database_url,
+            echo=settings.debug,
+            poolclass=QueuePool,
+            pool_size=settings.db_pool_size,
+            max_overflow=settings.db_max_overflow,
+            pool_pre_ping=True,  # Verify connections before use
+        )
+    else:
+        # SQLite: use NullPool (no pooling) for compatibility
+        return create_async_engine(
+            settings.database_url,
+            echo=settings.debug,
+            poolclass=NullPool,
+        )
+
+
+engine = _create_engine()
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 

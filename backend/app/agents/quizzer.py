@@ -34,6 +34,7 @@ class QuizzerAgent(BaseAgent):
         quiz_accuracy: float = 0.5,
         exclude_ids: list[str] = None,
         topics_learned: list[str] = None,
+        user_id: str = None,
     ) -> list[dict]:
         """
         Generate quiz questions for a machinery.
@@ -44,12 +45,14 @@ class QuizzerAgent(BaseAgent):
             quiz_accuracy: User's current accuracy (0-1) for adaptive difficulty
             exclude_ids: Question IDs to exclude (already answered)
             topics_learned: Topics the user has discussed with the Explainer
+            user_id: Optional user ID for rate limiting
 
         Returns:
             List of quiz questions
         """
         exclude_ids = exclude_ids or []
         topics_learned = topics_learned or []
+        self._current_user_id = user_id  # Store for use in _generate_with_llm
 
         # Get questions from the quiz bank
         bank_questions = get_questions_by_machinery(machinery_id)
@@ -145,7 +148,9 @@ class QuizzerAgent(BaseAgent):
             user_message=prompt,
         )
 
-        response = await self.llm.ainvoke(messages)
+        # Use rate-limited LLM invocation
+        user_id = getattr(self, '_current_user_id', None)
+        response = await self._invoke_llm(messages, user_id=user_id)
 
         # Parse JSON response - handle both string and Responses API formats
         try:
@@ -173,9 +178,17 @@ class QuizzerAgent(BaseAgent):
         options: list[str],
         selected_answer: int,
         correct_answer: int,
+        user_id: str = None,
     ) -> str:
         """
         Grade an answer and provide feedback.
+
+        Args:
+            question: The quiz question
+            options: List of answer options
+            selected_answer: Index of the selected answer
+            correct_answer: Index of the correct answer
+            user_id: Optional user ID for rate limiting
 
         Returns:
             Feedback string in Korean
@@ -198,7 +211,8 @@ class QuizzerAgent(BaseAgent):
             user_message=prompt,
         )
 
-        response = await self.llm.ainvoke(messages)
+        # Use rate-limited LLM invocation
+        response = await self._invoke_llm(messages, user_id=user_id)
         feedback = self._extract_text(response.content)
         # Fallback if feedback extraction fails
         if not feedback:

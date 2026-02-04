@@ -10,6 +10,8 @@ class Settings(BaseSettings):
 
     # Database
     database_url: str = "sqlite+aiosqlite:///./simvex.db"
+    db_pool_size: int = 5  # PostgreSQL connection pool size
+    db_max_overflow: int = 10  # Max connections above pool_size
 
     # CORS
     cors_origins: str = "http://localhost:5173,http://localhost:3000"
@@ -20,6 +22,11 @@ class Settings(BaseSettings):
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",")]
+
+    @property
+    def is_postgres(self) -> bool:
+        """Check if using PostgreSQL database."""
+        return self.database_url.startswith("postgresql")
 
     class Config:
         env_file = ".env"

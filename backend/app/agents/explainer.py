@@ -16,9 +16,16 @@ class ExplainerAgent(BaseAgent):
         machinery_id: str,
         user_message: str,
         conversation_history: list[dict] = None,
+        user_id: str = None,
     ) -> tuple[str, list[str]]:
         """
         Explain machinery concepts to the user.
+
+        Args:
+            machinery_id: The machinery ID to explain
+            user_message: The user's message
+            conversation_history: Optional conversation history
+            user_id: Optional user ID for rate limiting
 
         Returns:
             tuple: (response_text, topics_discussed)
@@ -37,8 +44,8 @@ class ExplainerAgent(BaseAgent):
             conversation_history=conversation_history,
         )
 
-        # Invoke LLM
-        response = await self.llm.ainvoke(messages)
+        # Invoke LLM with rate limiting
+        response = await self._invoke_llm(messages, user_id=user_id)
         response_text = self._extract_text(response.content)
 
         # Extract topics discussed from the response

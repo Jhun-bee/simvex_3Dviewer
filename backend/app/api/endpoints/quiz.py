@@ -1,6 +1,7 @@
 """Quiz endpoints for the Quizzer agent."""
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database import get_db
@@ -14,6 +15,7 @@ from app.models.schemas import (
 from app.services.quiz_service import QuizService
 from app.services.progress_service import ProgressService
 from app.data.machinery import get_machinery
+from app.utils.rate_limiter import RateLimitExceeded
 
 router = APIRouter()
 
@@ -56,6 +58,12 @@ async def generate_quiz(
 
         return QuizGenerateResponse(questions=quiz_questions)
 
+    except RateLimitExceeded as e:
+        return JSONResponse(
+            status_code=429,
+            content={"detail": e.message},
+            headers={"Retry-After": str(int(e.retry_after))},
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Quiz generation error: {str(e)}")
 
@@ -86,6 +94,7 @@ async def answer_quiz(
             options=request.options,
             selected_answer=request.selected_answer,
             correct_answer=request.correct_answer,
+            user_id=request.user_id,
         )
 
         # Record attempt if user_id provided
@@ -106,5 +115,11 @@ async def answer_quiz(
             feedback=feedback,
         )
 
+    except RateLimitExceeded as e:
+        return JSONResponse(
+            status_code=429,
+            content={"detail": e.message},
+            headers={"Retry-After": str(int(e.retry_after))},
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Answer grading error: {str(e)}")

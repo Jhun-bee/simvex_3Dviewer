@@ -72,6 +72,7 @@ class QuizService:
             quiz_accuracy=quiz_accuracy,
             exclude_ids=exclude_ids,
             topics_learned=topics_learned,
+            user_id=user_id,
         )
 
         return questions
@@ -82,9 +83,17 @@ class QuizService:
         options: list[str],
         selected_answer: int,
         correct_answer: int,
+        user_id: str = None,
     ) -> tuple[bool, str]:
         """
         Grade an answer and get feedback.
+
+        Args:
+            question_text: The quiz question text
+            options: List of answer options
+            selected_answer: Index of the selected answer
+            correct_answer: Index of the correct answer
+            user_id: Optional user ID for rate limiting
 
         Returns:
             tuple: (is_correct, feedback)
@@ -97,6 +106,7 @@ class QuizService:
             options=options,
             selected_answer=selected_answer,
             correct_answer=correct_answer,
+            user_id=user_id,
         )
 
         return is_correct, feedback
