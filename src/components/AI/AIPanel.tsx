@@ -1,15 +1,45 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User } from 'lucide-react';
+import { Send, Bot, User, ThumbsUp, ThumbsDown, Sparkles, Zap } from 'lucide-react';
 import { useAIStore } from '../../stores/aiStore';
+import { useViewerStore } from '../../stores/viewerStore';
 import { sendMessageToAI } from '../../utils/aiService';
 
 interface AIPanelProps {
   machineryId: string;
 }
 
+// Quick action presets
+interface QuickAction {
+  label: string;
+  icon: React.ReactNode;
+  getMessage: (selectedPart: string | null) => string;
+}
+
+const quickActions: QuickAction[] = [
+  {
+    label: '이 부품 설명',
+    icon: <Sparkles className="w-3 h-3" />,
+    getMessage: (part) => part ? `${part}에 대해 자세히 설명해줘` : '이 기계의 주요 부품들에 대해 설명해줘',
+  },
+  {
+    label: '핵심 요약',
+    icon: <Zap className="w-3 h-3" />,
+    getMessage: () => '이 기계의 핵심 내용을 3줄로 요약해줘',
+  },
+  {
+    label: '쉽게 설명',
+    icon: <Bot className="w-3 h-3" />,
+    getMessage: (part) => part
+      ? `${part}를 초등학생도 이해할 수 있게 쉽게 설명해줘`
+      : '이 기계를 초등학생도 이해할 수 있게 쉽게 설명해줘',
+  },
+];
+
 export default function AIPanel({ machineryId }: AIPanelProps) {
   const { getMessagesByMachinery, addMessage, isLoading, setLoading } = useAIStore();
+  const { selectedPart } = useViewerStore();
   const [input, setInput] = useState('');
+  const [feedbackGiven, setFeedbackGiven] = useState<Record<string, 'up' | 'down'>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const messages = getMessagesByMachinery(machineryId);
@@ -18,10 +48,10 @@ export default function AIPanel({ machineryId }: AIPanelProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleSend = async (messageText?: string) => {
+    const userMessage = (messageText || input).trim();
+    if (!userMessage || isLoading) return;
 
-    const userMessage = input.trim();
     setInput('');
     addMessage(machineryId, 'user', userMessage);
     setLoading(true);
@@ -32,7 +62,13 @@ export default function AIPanel({ machineryId }: AIPanelProps) {
         content: m.content,
       }));
 
-      const aiResponse = await sendMessageToAI(machineryId, userMessage, conversationHistory);
+      // Include selected part context in the conversation
+      let contextMessage = userMessage;
+      if (selectedPart && !userMessage.includes(selectedPart)) {
+        contextMessage = `[현재 선택된 부품: ${selectedPart}] ${userMessage}`;
+      }
+
+      const aiResponse = await sendMessageToAI(machineryId, contextMessage, conversationHistory);
       addMessage(machineryId, 'assistant', aiResponse);
     } catch (error) {
       console.error('AI 응답 오류:', error);
@@ -42,27 +78,49 @@ export default function AIPanel({ machineryId }: AIPanelProps) {
     }
   };
 
+  const handleQuickAction = (action: QuickAction) => {
+    const message = action.getMessage(selectedPart);
+    handleSend(message);
+  };
+
+  const handleFeedback = (messageId: string, type: 'up' | 'down') => {
+    setFeedbackGiven(prev => ({ ...prev, [messageId]: type }));
+    // In the future, this could be sent to backend for AI quality tracking
+    console.log(`Feedback for message ${messageId}: ${type}`);
+  };
+
   return (
     <div className="h-full flex flex-col p-4">
+      {/* Context indicator */}
+      {selectedPart && (
+        <div className="mb-3 px-3 py-2 bg-blue-50 rounded-lg border border-blue-200 flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-blue-600" />
+          <span className="text-sm text-blue-700">
+            <span className="font-medium">{selectedPart}</span> 선택됨
+          </span>
+        </div>
+      )}
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto space-y-4 mb-4">
         {messages.length === 0 && (
           <div className="text-center text-gray-500 mt-8">
             <Bot className="w-12 h-12 mx-auto mb-2 opacity-50" />
             <p>AI 어시스턴트에게 질문하세요</p>
+            <p className="text-xs mt-1 text-gray-400">
+              {selectedPart ? `${selectedPart}에 대해 물어보세요!` : '아래 버튼으로 빠르게 시작해보세요'}
+            </p>
           </div>
         )}
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`flex gap-3 ${
-              message.role === 'user' ? 'flex-row-reverse' : 'flex-row'
-            }`}
+            className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'
+              }`}
           >
             <div
-              className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                message.role === 'user' ? 'bg-primary' : 'bg-gray-200'
-              }`}
+              className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${message.role === 'user' ? 'bg-primary' : 'bg-gray-200'
+                }`}
             >
               {message.role === 'user' ? (
                 <User className="w-4 h-4 text-white" />
@@ -70,17 +128,45 @@ export default function AIPanel({ machineryId }: AIPanelProps) {
                 <Bot className="w-4 h-4 text-gray-600" />
               )}
             </div>
-            <div
-              className={`flex-1 p-3 rounded-lg ${
-                message.role === 'user'
-                  ? 'bg-primary text-white'
-                  : 'bg-gray-100 text-gray-800'
-              }`}
-            >
-              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-              <span className="text-xs opacity-70 mt-1 block">
-                {new Date(message.timestamp).toLocaleTimeString('ko-KR')}
-              </span>
+            <div className="flex-1">
+              <div
+                className={`p-3 rounded-lg ${message.role === 'user'
+                    ? 'bg-primary text-white'
+                    : 'bg-gray-100 text-gray-800'
+                  }`}
+              >
+                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                <span className="text-xs opacity-70 mt-1 block">
+                  {new Date(message.timestamp).toLocaleTimeString('ko-KR')}
+                </span>
+              </div>
+
+              {/* Feedback buttons for AI responses */}
+              {message.role === 'assistant' && (
+                <div className="flex items-center gap-2 mt-1.5 ml-1">
+                  <span className="text-xs text-gray-400">도움이 됐나요?</span>
+                  <button
+                    onClick={() => handleFeedback(message.id, 'up')}
+                    className={`p-1 rounded transition-colors ${feedbackGiven[message.id] === 'up'
+                        ? 'bg-green-100 text-green-600'
+                        : 'hover:bg-gray-100 text-gray-400'
+                      }`}
+                    disabled={!!feedbackGiven[message.id]}
+                  >
+                    <ThumbsUp className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => handleFeedback(message.id, 'down')}
+                    className={`p-1 rounded transition-colors ${feedbackGiven[message.id] === 'down'
+                        ? 'bg-red-100 text-red-600'
+                        : 'hover:bg-gray-100 text-gray-400'
+                      }`}
+                    disabled={!!feedbackGiven[message.id]}
+                  >
+                    <ThumbsDown className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ))}
@@ -97,6 +183,21 @@ export default function AIPanel({ machineryId }: AIPanelProps) {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Quick Action Buttons */}
+      <div className="flex flex-wrap gap-2 mb-3">
+        {quickActions.map((action, index) => (
+          <button
+            key={index}
+            onClick={() => handleQuickAction(action)}
+            disabled={isLoading}
+            className="px-3 py-1.5 text-xs bg-gradient-to-r from-purple-50 to-blue-50 hover:from-purple-100 hover:to-blue-100 text-purple-700 rounded-full border border-purple-200 flex items-center gap-1.5 transition-colors disabled:opacity-50"
+          >
+            {action.icon}
+            <span>{action.label}</span>
+          </button>
+        ))}
+      </div>
+
       {/* Input */}
       <div className="flex gap-2">
         <input
@@ -104,12 +205,12 @@ export default function AIPanel({ machineryId }: AIPanelProps) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-          placeholder="질문을 입력하세요..."
+          placeholder={selectedPart ? `${selectedPart}에 대해 질문하세요...` : '질문을 입력하세요...'}
           disabled={isLoading}
           className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100"
         />
         <button
-          onClick={handleSend}
+          onClick={() => handleSend()}
           disabled={!input.trim() || isLoading}
           className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
         >

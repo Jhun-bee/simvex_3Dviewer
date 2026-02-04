@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { ChevronRight, ChevronLeft, FileText, MessageSquare, Brain } from 'lucide-react';
+import { ChevronRight, ChevronLeft, FileText, MessageSquare, Brain, GraduationCap } from 'lucide-react';
 import NotePanel from '../Notes/NotePanel';
 import AIPanel from '../AI/AIPanel';
 import QuizPanel from '../Quiz/QuizPanel';
+import LearningProgress from '../Education/LearningProgress';
 import { generatePDF } from '../../utils/pdfGenerator';
 import { useNoteStore } from '../../stores/noteStore';
 import { useAIStore } from '../../stores/aiStore';
+import { useViewerStore } from '../../stores/viewerStore';
 
 interface SidebarProps {
   machineryId: string;
@@ -13,12 +15,13 @@ interface SidebarProps {
   onToggle: () => void;
 }
 
-type Tab = 'note' | 'ai' | 'quiz';
+type Tab = 'note' | 'ai' | 'quiz' | 'progress';
 
 export default function Sidebar({ machineryId, isOpen, onToggle }: SidebarProps) {
   const [activeTab, setActiveTab] = useState<Tab>('note');
   const { getNotesByMachinery } = useNoteStore();
   const { getMessagesByMachinery } = useAIStore();
+  const { setSelectedPart } = useViewerStore();
 
   // Listen for PDF export event from Header menu
   useEffect(() => {
@@ -41,6 +44,11 @@ export default function Sidebar({ machineryId, isOpen, onToggle }: SidebarProps)
     };
   }, [machineryId, getNotesByMachinery, getMessagesByMachinery]);
 
+  const handlePartSelect = (partName: string) => {
+    setSelectedPart(partName);
+    setActiveTab('note'); // Switch to note tab to write notes about selected part
+  };
+
   return (
     <>
       {/* Toggle Button */}
@@ -60,39 +68,59 @@ export default function Sidebar({ machineryId, isOpen, onToggle }: SidebarProps)
         {/* Tabs */}
         <div className="flex border-b">
           <button
-            onClick={() => setActiveTab('note')}
-            className={`flex-1 py-3 px-4 flex items-center justify-center gap-2 transition-colors ${activeTab === 'note'
+            onClick={() => setActiveTab('progress')}
+            className={`flex-1 py-3 px-2 flex items-center justify-center gap-1 transition-colors ${activeTab === 'progress'
               ? 'bg-blue-50 text-primary border-b-2 border-primary'
               : 'text-gray-600 hover:bg-gray-50'
               }`}
+            title="학습 진행"
+          >
+            <GraduationCap className="w-5 h-5" />
+            <span className="text-xs">학습</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('note')}
+            className={`flex-1 py-3 px-2 flex items-center justify-center gap-1 transition-colors ${activeTab === 'note'
+              ? 'bg-blue-50 text-primary border-b-2 border-primary'
+              : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            title="노트"
           >
             <FileText className="w-5 h-5" />
-            <span>노트</span>
+            <span className="text-xs">노트</span>
           </button>
           <button
             onClick={() => setActiveTab('ai')}
-            className={`flex-1 py-3 px-4 flex items-center justify-center gap-2 transition-colors ${activeTab === 'ai'
+            className={`flex-1 py-3 px-2 flex items-center justify-center gap-1 transition-colors ${activeTab === 'ai'
               ? 'bg-blue-50 text-primary border-b-2 border-primary'
               : 'text-gray-600 hover:bg-gray-50'
               }`}
+            title="AI 어시스턴트"
           >
             <MessageSquare className="w-5 h-5" />
-            <span>AI</span>
+            <span className="text-xs">AI</span>
           </button>
           <button
             onClick={() => setActiveTab('quiz')}
-            className={`flex-1 py-3 px-4 flex items-center justify-center gap-2 transition-colors ${activeTab === 'quiz'
+            className={`flex-1 py-3 px-2 flex items-center justify-center gap-1 transition-colors ${activeTab === 'quiz'
               ? 'bg-blue-50 text-primary border-b-2 border-primary'
               : 'text-gray-600 hover:bg-gray-50'
               }`}
+            title="퀴즈"
           >
             <Brain className="w-5 h-5" />
-            <span>퀴즈</span>
+            <span className="text-xs">퀴즈</span>
           </button>
         </div>
 
-        {/* Content - now takes full remaining space without bottom button */}
+        {/* Content */}
         <div className="flex-1 overflow-hidden">
+          {activeTab === 'progress' && (
+            <LearningProgress
+              machineryId={machineryId}
+              onPartSelect={handlePartSelect}
+            />
+          )}
           {activeTab === 'note' && <NotePanel machineryId={machineryId} />}
           {activeTab === 'ai' && <AIPanel machineryId={machineryId} />}
           {activeTab === 'quiz' && <QuizPanel machineryId={machineryId} />}
