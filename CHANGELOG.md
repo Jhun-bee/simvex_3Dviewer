@@ -15,6 +15,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v0.2.2] - 2026-02-04
+
+### Added
+- `.env.example` template for environment variables setup
+- Comprehensive `.gitignore` improvements:
+  - Build outputs: `build/`, `out/`, `.next/`, `.vercel/`
+  - Environment variable patterns: `.env.local`, `.env.*.local`
+  - OS-specific files: Windows/Mac/Linux system files
+  - Editor configurations: VSCode, IntelliJ, Vim, etc.
+  - Testing outputs: `coverage/`, `.nyc_output`
+  - Temporary files: `*.tmp`, `*.temp`, `.cache/`
+  - Korean documentation: `도사제공자료/`, `*기획서*`, `*설계도*`
+  - TypeScript build files: `*.tsbuildinfo`, `next-env.d.ts`
+
+### Security
+- ✅ Enhanced environment variable protection (all variants blocked)
+- ✅ API Key document protection
+- ✅ Project documentation leak prevention
+
+### Improved
+- **Collaboration**: Prevented editor config conflicts across different IDEs
+- **Security**: Comprehensive sensitive file protection
+- **Repository**: Optimized repository size by excluding cache/temp files
+
+---
+
 ## [v0.2.0] - 2026-02-04
 
 ### Added
