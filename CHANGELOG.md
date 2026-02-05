@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.3] - 2026-02-05
+
+### Added
+- **자동 BoundingBox 기반 조립 시스템**
+  - `AssemblyConstraintResolver` 클래스 추가: 런타임 BBox 자동 계산
+  - `BoundingBoxDebugger` UI: 실시간 BBox 시각화 디버그 패널
+  - `AssemblyConstraint` 타입: Fixed, StackedOn, Threaded, RadialAroundCenter 지원
+- **카메라 컨트롤 안내 UI**
+  - `ControlsHint` 컴포넌트: 마우스/키보드/터치 조작법 안내
+  - 좌클릭 드래그=화면 이동, 우클릭 드래그=회전, 휠=줌
+
+### Changed
+- `src/types/index.ts`: AssemblyConstraint 타입 및 MachineryPart.constraint 필드 추가
+- 기존 assemblyOffset과 하위 호환 유지
+
+---
+
 ## [v0.3.2] - 2026-02-05
 
 ### Fixed
