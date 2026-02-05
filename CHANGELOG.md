@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.2] - 2026-02-05
+
+### Fixed
+- **Suspension 조립 위치 완전 수정**
+  - assemblyOffset 값 재계산: 부품 간 간격 최적화
+  - ROD: `[0,3,0]` (이전 `[0,1,0]`)
+  - SPRING: `[0,6,0]` (이전 `[0,2,0]`)
+  - NIT: `[0,12,0]` (이전 `[0,6,0]`)
+  - NUT: `[0,16,0]` (이전 `[0,8,0]`)
+- 0% 분해도 시 부품들이 조립도와 일치하도록 개선
+- 부품 간 겹침 현상 완전 해결
+
+---
+
 ## [v0.3.1] - 2026-02-05
 
 ### Changed
