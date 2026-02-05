@@ -1,11 +1,18 @@
 import { useState } from 'react';
-import { Save, Plus, Trash2, FileText, Tag } from 'lucide-react';
+import { Save, Plus, Trash2, FileText, Tag, Lightbulb } from 'lucide-react';
 import { useNoteStore } from '../../stores/noteStore';
 import { useViewerStore } from '../../stores/viewerStore';
 
 interface NotePanelProps {
   machineryId: string;
 }
+
+// Quick note templates for structured learning
+const noteTemplates = [
+  { label: '역할', template: '이 부품의 역할:\n• ' },
+  { label: '배운 점', template: '오늘 배운 점:\n• ' },
+  { label: '질문', template: '❓ 궁금한 점:\n' },
+];
 
 export default function NotePanel({ machineryId }: NotePanelProps) {
   const { addNote, updateNote, deleteNote, getNotesByMachinery } = useNoteStore();
@@ -39,8 +46,10 @@ export default function NotePanel({ machineryId }: NotePanelProps) {
     setCurrentNote(content);
   };
 
-  // Get unique parts that have notes
-  const partsWithNotes = [...new Set(allNotes.filter(n => n.partName).map(n => n.partName))];
+  const handleTemplateClick = (template: string) => {
+    const prefix = selectedPart ? `[${selectedPart}] ` : '';
+    setCurrentNote(prefix + template);
+  };
 
   return (
     <div className="h-full flex flex-col p-4">
@@ -88,8 +97,23 @@ export default function NotePanel({ machineryId }: NotePanelProps) {
         </div>
       </div>
 
+      {/* Quick Templates */}
+      <div className="mb-3 flex items-center gap-2">
+        <Lightbulb className="w-4 h-4 text-yellow-500" />
+        <span className="text-xs text-gray-500">템플릿:</span>
+        {noteTemplates.map((t) => (
+          <button
+            key={t.label}
+            onClick={() => handleTemplateClick(t.template)}
+            className="text-xs px-2 py-1 bg-yellow-50 text-yellow-700 rounded border border-yellow-200 hover:bg-yellow-100 transition-colors"
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
       {/* Filter by Part */}
-      {partsWithNotes.length > 0 && (
+      {allNotes.filter(n => n.partName).length > 0 && (
         <div className="mb-3 flex items-center gap-2">
           <button
             onClick={() => setFilterByPart(!filterByPart)}

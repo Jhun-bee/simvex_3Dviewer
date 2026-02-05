@@ -18,6 +18,13 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     response: str
     topics_discussed: list[str] = []
+    from_cache: bool = False
+    cache_similarity: Optional[float] = None
+
+
+class FeedbackRequest(BaseModel):
+    question: str
+    positive: bool
 
 
 # Quiz Schemas
@@ -26,6 +33,7 @@ class QuizQuestion(BaseModel):
     question: str
     options: list[str]
     machinery_id: str
+    correct_answer: Optional[int] = None
 
 
 class QuizGenerateRequest(BaseModel):

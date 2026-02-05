@@ -1,23 +1,15 @@
-import { useMemo } from 'react';
-import { CheckCircle, Circle, TrendingUp, Target, BookOpen } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { CheckCircle, Circle, TrendingUp, Target, BookOpen, FileDown, MessageSquare } from 'lucide-react';
 import { useNoteStore } from '../../stores/noteStore';
+import { useAIStore } from '../../stores/aiStore';
 import { machineryData } from '../../data/machineryData';
 import { getMachineryProgress } from '../../utils/aiService';
-import { useState, useEffect } from 'react';
+import { getAnonymousUserId } from '../../utils/user';
+import StudySummary from './StudySummary';
 
 interface LearningProgressProps {
     machineryId: string;
     onPartSelect?: (partName: string) => void;
-}
-
-// Get anonymous user ID (same as in QuizPanel)
-function getAnonymousUserId(): string {
-    let userId = localStorage.getItem('simvex_user_id');
-    if (!userId) {
-        userId = `anon_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-        localStorage.setItem('simvex_user_id', userId);
-    }
-    return userId;
 }
 
 interface PartProgress {
@@ -34,12 +26,15 @@ interface QuizStats {
 
 export default function LearningProgress({ machineryId, onPartSelect }: LearningProgressProps) {
     const { getNotesByMachinery } = useNoteStore();
+    const { getInteractionCount } = useAIStore();
     const [quizStats, setQuizStats] = useState<QuizStats | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [showSummary, setShowSummary] = useState(false);
 
     const machinery = machineryData[machineryId];
     const notes = getNotesByMachinery(machineryId);
     const userId = getAnonymousUserId();
+    const aiInteractions = getInteractionCount(machineryId);
 
     // Calculate part-level progress
     const partsProgress: PartProgress[] = useMemo(() => {
@@ -78,7 +73,12 @@ export default function LearningProgress({ machineryId, onPartSelect }: Learning
 
     const partsWithNotes = partsProgress.filter(p => p.hasNote).length;
     const totalParts = partsProgress.length;
-    const progressPercent = totalParts > 0 ? (partsWithNotes / totalParts) * 100 : 0;
+
+    // Holistic progress: notes 40% + quiz 30% + AI interactions 30%
+    const noteProgress = totalParts > 0 ? (partsWithNotes / totalParts) : 0;
+    const quizProgress = quizStats && quizStats.attempts > 0 ? quizStats.accuracy : 0;
+    const aiProgress = Math.min(aiInteractions / 10, 1); // Cap at 10 interactions = 100%
+    const progressPercent = (noteProgress * 40) + (quizProgress * 30) + (aiProgress * 30);
 
     if (!machinery) {
         return <div className="p-4 text-gray-500">기계를 찾을 수 없습니다.</div>;
@@ -87,19 +87,28 @@ export default function LearningProgress({ machineryId, onPartSelect }: Learning
     return (
         <div className="h-full flex flex-col p-4 overflow-y-auto">
             {/* Header */}
-            <div className="mb-4">
-                <h3 className="font-bold text-gray-800 flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-primary" />
-                    학습 진행률
-                </h3>
-                <p className="text-xs text-gray-500 mt-1">노트를 작성하면 학습 완료로 표시됩니다</p>
+            <div className="mb-4 flex items-center justify-between">
+                <div>
+                    <h3 className="font-bold text-gray-800 flex items-center gap-2">
+                        <BookOpen className="w-5 h-5 text-primary" />
+                        학습 진행률
+                    </h3>
+                    <p className="text-xs text-gray-500 mt-1">노트, 퀴즈, AI 대화를 통해 학습 진행률이 올라갑니다</p>
+                </div>
+                <button
+                    onClick={() => setShowSummary(true)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 hover:text-primary"
+                    title="학습 요약 보기"
+                >
+                    <FileDown className="w-5 h-5" />
+                </button>
             </div>
 
             {/* Overall Progress Bar */}
             <div className="mb-6">
                 <div className="flex justify-between text-sm text-gray-600 mb-1">
-                    <span>부품 학습</span>
-                    <span className="font-medium">{partsWithNotes} / {totalParts}</span>
+                    <span>종합 학습</span>
+                    <span className="font-medium">{Math.round(progressPercent)}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3">
                     <div
@@ -108,8 +117,8 @@ export default function LearningProgress({ machineryId, onPartSelect }: Learning
                     />
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                    {progressPercent === 100
-                        ? '🎉 모든 부품을 학습했습니다!'
+                    {progressPercent >= 100
+                        ? '🎉 모든 학습을 완료했습니다!'
                         : `${Math.round(progressPercent)}% 완료`
                     }
                 </p>
@@ -134,6 +143,26 @@ export default function LearningProgress({ machineryId, onPartSelect }: Learning
                         <div>
                             <div className="text-lg font-bold text-primary">{Math.round(quizStats.accuracy * 100)}%</div>
                             <div className="text-xs text-gray-500">정확도</div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* AI Interaction Stats */}
+            {aiInteractions > 0 && (
+                <div className="mb-6 p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
+                    <div className="flex items-center gap-2 mb-2">
+                        <MessageSquare className="w-4 h-4 text-blue-600" />
+                        <span className="text-sm font-medium text-blue-800">AI 대화</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-center">
+                        <div>
+                            <div className="text-lg font-bold text-gray-800">{aiInteractions}</div>
+                            <div className="text-xs text-gray-500">질문 수</div>
+                        </div>
+                        <div>
+                            <div className="text-lg font-bold text-blue-600">{Math.round(aiProgress * 100)}%</div>
+                            <div className="text-xs text-gray-500">AI 학습</div>
                         </div>
                     </div>
                 </div>
@@ -179,6 +208,15 @@ export default function LearningProgress({ machineryId, onPartSelect }: Learning
                     💡 <strong>팁:</strong> 3D 뷰어에서 부품을 클릭하면 해당 부품에 대한 노트를 쉽게 작성할 수 있어요!
                 </p>
             </div>
+
+            {/* Study Summary Modal */}
+            {showSummary && (
+                <StudySummary
+                    machineryId={machineryId}
+                    machineryName={machinery.name}
+                    onClose={() => setShowSummary(false)}
+                />
+            )}
         </div>
     );
 }

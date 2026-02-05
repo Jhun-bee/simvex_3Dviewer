@@ -89,6 +89,21 @@ class GeneratedQuiz(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utc_now)
 
 
+class QACache(Base):
+    """Cache for frequently asked questions with semantic embeddings."""
+    __tablename__ = "qa_cache"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    machinery_id: Mapped[str] = mapped_column(String(50), index=True)
+    question: Mapped[str] = mapped_column(Text)
+    answer: Mapped[str] = mapped_column(Text)
+    embedding: Mapped[list] = mapped_column(JSON)  # Stored as list of floats
+    hit_count: Mapped[int] = mapped_column(Integer, default=1)
+    quality_score: Mapped[float] = mapped_column(Float, default=1.0)  # Based on user feedback
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utc_now)
+    last_used_at: Mapped[datetime] = mapped_column(DateTime, default=_utc_now, onupdate=_utc_now)
+
+
 # Database engine and session
 def _create_engine():
     """Create async engine with appropriate pooling for the database type."""

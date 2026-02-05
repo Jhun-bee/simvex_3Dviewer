@@ -101,12 +101,103 @@ export async function sendMessageToAI(
   }
 }
 
+/**
+ * Stream a message to AI and receive tokens as they arrive.
+ * Uses Server-Sent Events (SSE) for real-time streaming.
+ */
+export async function streamMessageFromAI(
+  machineryId: string,
+  userMessage: string,
+  conversationHistory: { role: 'user' | 'assistant'; content: string }[] = [],
+  userId: string | undefined,
+  onChunk: (text: string) => void,
+  onComplete?: (topics: string[]) => void,
+  onError?: (error: string) => void
+): Promise<void> {
+  // Only works with backend
+  if (!useBackend) {
+    // Fall back to non-streaming
+    const response = await sendMessageToAI(machineryId, userMessage, conversationHistory, userId);
+    onChunk(response);
+    onComplete?.([]);
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/chat/${machineryId}/stream`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: userMessage,
+        conversation_history: conversationHistory,
+        user_id: userId,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Stream error: ${response.status}`);
+    }
+
+    if (!response.body) {
+      throw new Error('No response body');
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value);
+      const lines = chunk.split('\n');
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          try {
+            const data = JSON.parse(line.slice(6));
+
+            if (data.text) {
+              onChunk(data.text);
+            }
+
+            if (data.done) {
+              onComplete?.(data.topics || []);
+            }
+
+            if (data.error) {
+              onError?.(data.error);
+            }
+          } catch (parseError) {
+            // Ignore JSON parse errors for partial data
+          }
+        }
+      }
+    }
+  } catch (error: any) {
+    console.error('Stream error:', error);
+    onError?.(error?.message || 'Streaming failed');
+
+    // Fall back to non-streaming on error
+    try {
+      const response = await sendMessageToAI(machineryId, userMessage, conversationHistory, userId);
+      onChunk(response);
+      onComplete?.([]);
+    } catch (fallbackError) {
+      onError?.('Failed to get response');
+    }
+  }
+}
+
 // Quiz API functions
 export interface QuizQuestion {
   id: string;
   question: string;
   options: string[];
   machinery_id: string;
+  correct_answer?: number;
 }
 
 export interface QuizAnswerResponse {
@@ -236,4 +327,19 @@ export async function checkBackendHealth(): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+// Feedback
+export async function submitFeedback(
+  machineryId: string,
+  question: string,
+  positive: boolean
+): Promise<void> {
+  if (!useBackend) return;
+
+  await fetch(`${API_BASE_URL}/chat/${machineryId}/feedback`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question, positive }),
+  });
 }

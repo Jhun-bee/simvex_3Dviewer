@@ -1,21 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
-import { CheckCircle, XCircle, RotateCcw, Sparkles, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, RotateCcw, Sparkles, Loader2, Eye } from 'lucide-react';
 import { quizData as staticQuizData } from '../../data/quizData';
 import { generateQuiz, submitQuizAnswer, QuizQuestion as APIQuizQuestion } from '../../utils/aiService';
 import { QuizQuestion } from '../../types';
+import { getAnonymousUserId } from '../../utils/user';
 
 interface QuizPanelProps {
   machineryId: string;
 }
 
-// Generate or retrieve anonymous user ID
-function getAnonymousUserId(): string {
-  let userId = localStorage.getItem('simvex_user_id');
-  if (!userId) {
-    userId = `anon_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-    localStorage.setItem('simvex_user_id', userId);
-  }
-  return userId;
+interface AnsweredQuestion {
+  question: QuizQuestion;
+  selectedAnswer: number;
+  isCorrect: boolean;
+  feedback: string | null;
 }
 
 export default function QuizPanel({ machineryId }: QuizPanelProps) {
@@ -32,12 +30,18 @@ export default function QuizPanel({ machineryId }: QuizPanelProps) {
   const [useBackend, setUseBackend] = useState(true);
   const [difficulty, setDifficulty] = useState<string>('보통');
 
+  // Review mode states
+  const [answeredQuestions, setAnsweredQuestions] = useState<AnsweredQuestion[]>([]);
+  const [showReview, setShowReview] = useState(false);
+
   const userId = getAnonymousUserId();
 
   // Load questions - try backend first, fallback to static
   const loadQuestions = useCallback(async () => {
     setIsLoading(true);
     setAiFeedback(null);
+    setAnsweredQuestions([]);
+    setShowReview(false);
 
     if (useBackend) {
       try {
@@ -48,7 +52,7 @@ export default function QuizPanel({ machineryId }: QuizPanelProps) {
           machineryId: q.machinery_id,
           question: q.question,
           options: q.options,
-          correctAnswer: (q as any).correct_answer ?? 0, // Backend returns correct_answer on generation
+          correctAnswer: q.correct_answer ?? 0,
         }));
 
         if (converted.length > 0) {
@@ -108,6 +112,8 @@ export default function QuizPanel({ machineryId }: QuizPanelProps) {
       setScore(score + 1);
     }
 
+    let feedback: string | null = null;
+
     // Get AI feedback from backend
     if (useBackend) {
       setIsLoading(true);
@@ -121,19 +127,27 @@ export default function QuizPanel({ machineryId }: QuizPanelProps) {
           currentQuestion.correctAnswer,
           userId
         );
+        feedback = response.feedback;
         setAiFeedback(response.feedback);
       } catch (error) {
         console.error('Failed to get AI feedback:', error);
         // Provide fallback feedback
-        setAiFeedback(
-          isCorrect
-            ? '정답입니다! 잘 하셨습니다.'
-            : `정답은 ${currentQuestion.correctAnswer + 1}번 "${currentQuestion.options[currentQuestion.correctAnswer]}"입니다.`
-        );
+        feedback = isCorrect
+          ? '정답입니다! 잘 하셨습니다.'
+          : `정답은 ${currentQuestion.correctAnswer + 1}번 "${currentQuestion.options[currentQuestion.correctAnswer]}"입니다.`;
+        setAiFeedback(feedback);
       } finally {
         setIsLoading(false);
       }
     }
+
+    // Track answered question
+    setAnsweredQuestions(prev => [...prev, {
+      question: currentQuestion,
+      selectedAnswer: answerIndex,
+      isCorrect,
+      feedback,
+    }]);
   };
 
   const handleNext = () => {
@@ -146,6 +160,8 @@ export default function QuizPanel({ machineryId }: QuizPanelProps) {
   };
 
   const handleReset = () => {
+    setAnsweredQuestions([]);
+    setShowReview(false);
     loadQuestions();
     setSelectedAnswer(null);
     setShowResult(false);
@@ -153,6 +169,8 @@ export default function QuizPanel({ machineryId }: QuizPanelProps) {
   };
 
   const handleGenerateNew = () => {
+    setAnsweredQuestions([]);
+    setShowReview(false);
     setUseBackend(true);
     loadQuestions();
   };
@@ -183,9 +201,74 @@ export default function QuizPanel({ machineryId }: QuizPanelProps) {
     );
   }
 
+  // Review mode - show wrong answers
+  if (showReview) {
+    const wrongAnswers = answeredQuestions.filter(aq => !aq.isCorrect);
+
+    return (
+      <div className="h-full flex flex-col p-6 overflow-y-auto">
+        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <Eye className="w-5 h-5 text-red-500" />
+          오답 복습 ({wrongAnswers.length}문제)
+        </h3>
+
+        <div className="flex-1 space-y-6">
+          {wrongAnswers.map((aq, idx) => (
+            <div key={idx} className="p-4 bg-red-50 rounded-lg border border-red-200">
+              <p className="font-medium text-gray-800 mb-3">{idx + 1}. {aq.question.question}</p>
+              <div className="space-y-2 mb-3">
+                {aq.question.options.map((option, optIdx) => (
+                  <div
+                    key={optIdx}
+                    className={`p-2 rounded text-sm ${
+                      optIdx === aq.question.correctAnswer
+                        ? 'bg-green-100 text-green-800 font-medium'
+                        : optIdx === aq.selectedAnswer
+                          ? 'bg-red-100 text-red-800 line-through'
+                          : 'text-gray-600'
+                    }`}
+                  >
+                    {optIdx === aq.question.correctAnswer && <CheckCircle className="w-4 h-4 inline mr-1" />}
+                    {optIdx === aq.selectedAnswer && optIdx !== aq.question.correctAnswer && <XCircle className="w-4 h-4 inline mr-1" />}
+                    {option}
+                  </div>
+                ))}
+              </div>
+              {aq.feedback && (
+                <div className="p-3 bg-purple-50 rounded border border-purple-200">
+                  <div className="flex items-start gap-2">
+                    <Sparkles className="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0" />
+                    <p className="text-sm text-gray-700">{aq.feedback}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="flex flex-col gap-3 mt-6">
+          <button
+            onClick={() => setShowReview(false)}
+            className="w-full py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+          >
+            결과로 돌아가기
+          </button>
+          <button
+            onClick={handleGenerateNew}
+            className="w-full py-3 border border-primary text-primary rounded-lg hover:bg-primary/10 transition-colors flex items-center gap-2 justify-center"
+          >
+            <Sparkles className="w-5 h-5" />
+            <span>새 문제 생성</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // Quiz complete
   if (answered === questions.length && showResult) {
     const percentage = Math.round((score / questions.length) * 100);
+    const wrongCount = answeredQuestions.filter(aq => !aq.isCorrect).length;
 
     return (
       <div className="h-full flex flex-col items-center justify-center p-8">
@@ -201,6 +284,15 @@ export default function QuizPanel({ machineryId }: QuizPanelProps) {
             난이도: {difficulty}
           </p>
           <div className="flex flex-col gap-3">
+            {wrongCount > 0 && (
+              <button
+                onClick={() => setShowReview(true)}
+                className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 mx-auto"
+              >
+                <Eye className="w-5 h-5" />
+                <span>오답 복습 ({wrongCount}문제)</span>
+              </button>
+            )}
             <button
               onClick={handleReset}
               className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2 mx-auto"
@@ -263,12 +355,12 @@ export default function QuizPanel({ machineryId }: QuizPanelProps) {
                 onClick={() => handleAnswer(index)}
                 disabled={showResult}
                 className={`w-full p-4 text-left rounded-lg border-2 transition-all ${showCorrect
-                    ? 'border-green-500 bg-green-50'
-                    : showWrong
-                      ? 'border-red-500 bg-red-50'
-                      : isSelected
-                        ? 'border-primary bg-blue-50'
-                        : 'border-gray-300 hover:border-primary hover:bg-gray-50'
+                  ? 'border-green-500 bg-green-50'
+                  : showWrong
+                    ? 'border-red-500 bg-red-50'
+                    : isSelected
+                      ? 'border-primary bg-blue-50'
+                      : 'border-gray-300 hover:border-primary hover:bg-gray-50'
                   } ${showResult ? 'cursor-not-allowed' : 'cursor-pointer'}`}
               >
                 <div className="flex items-center justify-between">
