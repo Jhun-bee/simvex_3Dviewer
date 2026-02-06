@@ -45,6 +45,7 @@ class WikipediaService:
 
     API_URL_TEMPLATE = "https://{lang}.wikipedia.org/w/api.php"
     TIMEOUT = 15.0
+    HEADERS = {"User-Agent": "SimVex/1.0 (educational machinery learning app; https://github.com/doric9/simvex_3Dviewer)"}
 
     async def fetch_article(self, title: str, lang: str = "ko") -> str | None:
         """
@@ -67,7 +68,7 @@ class WikipediaService:
         }
 
         try:
-            async with httpx.AsyncClient(timeout=self.TIMEOUT) as client:
+            async with httpx.AsyncClient(timeout=self.TIMEOUT, headers=self.HEADERS) as client:
                 response = await client.get(url, params=params)
                 response.raise_for_status()
                 data = response.json()
@@ -92,7 +93,7 @@ class WikipediaService:
         """
         results = []
 
-        async with httpx.AsyncClient(timeout=self.TIMEOUT) as client:
+        async with httpx.AsyncClient(timeout=self.TIMEOUT, headers=self.HEADERS) as client:
             for machinery_id, langs in self.WIKIPEDIA_TOPICS.items():
                 for lang, titles in langs.items():
                     for title in titles:
