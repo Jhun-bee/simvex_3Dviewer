@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [v0.4.0] - 2026-02-07
+
+### Added
+- **AI RAG System**
+  - Hybrid Search & Contextual Chunks 도입으로 검색 정확도 향상
+  - Source Re-ranking: 관련성 높은 문서 우선 노출
+- **Knowledge Search UI**
+  - 기술 문서 검색 전용 인터페이스 추가 (`components/Education/KnowledgeSearch.tsx`)
+  - 검색 출처(Source) 표시 기능
+
+### Improved
+- **Quiz Performance**
+  - 퀴즈 피드백 스트리밍 지원 (실시간 피드백)
+  - 퀴즈 로딩 속도 최적화
+
 ## [v0.3.3] - 2026-02-05
 
 ### Added
