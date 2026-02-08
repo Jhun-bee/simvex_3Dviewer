@@ -58,18 +58,18 @@ export const ControlsHint: React.FC = () => {
                 <div className="space-y-3">
                     <div className="flex items-center justify-between group">
                         <div className="flex items-center gap-3">
-                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                            <span className="text-[11px] font-bold text-gray-300">화면 이동</span>
+                            <div className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                            <span className="text-[11px] font-bold text-gray-300">카메라 회전</span>
                         </div>
-                        <span className="text-[10px] font-black text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded-md border border-blue-400/20">좌클릭 드래그</span>
+                        <span className="text-[10px] font-black text-rose-400 bg-rose-400/10 px-2 py-0.5 rounded-md border border-rose-400/20">좌클릭 드래그</span>
                     </div>
 
                     <div className="flex items-center justify-between group">
                         <div className="flex items-center gap-3">
-                            <div className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                            <span className="text-[11px] font-bold text-gray-300">카메라 회전</span>
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                            <span className="text-[11px] font-bold text-gray-300">화면 이동</span>
                         </div>
-                        <span className="text-[10px] font-black text-rose-400 bg-rose-400/10 px-2 py-0.5 rounded-md border border-rose-400/20">우클릭 드래그</span>
+                        <span className="text-[10px] font-black text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded-md border border-blue-400/20">우클릭 드래그</span>
                     </div>
 
                     <div className="flex items-center justify-between group">

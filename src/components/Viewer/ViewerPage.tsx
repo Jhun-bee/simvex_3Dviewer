@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { machineryData } from '../../data/machineryData';
 import Scene3D from './Scene3D';
 import ExplodeSlider from './ExplodeSlider';
@@ -15,6 +15,12 @@ export default function ViewerPage({ machineryId }: ViewerPageProps) {
   const machinery = machineryData[machineryId];
   const { selectedPart, explodeFactor, setExplodeFactor } = useViewerStore();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Ensure 0% (Assembled) is the default state when entering
+  useEffect(() => {
+    setExplodeFactor(0);
+  }, [setExplodeFactor]);
+
   if (!machinery) {
     return <div>기계를 찾을 수 없습니다.</div>;
   }
@@ -65,3 +71,5 @@ export default function ViewerPage({ machineryId }: ViewerPageProps) {
     </div>
   );
 }
+
+// GestureHint removed in favor of global ControlsHint
