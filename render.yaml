@@ -31,7 +31,6 @@ services:
     runtime: static
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
-    plan: free
     envVars:
       - key: VITE_API_BASE_URL
         value: https://simvex-api.onrender.com/api/v1
