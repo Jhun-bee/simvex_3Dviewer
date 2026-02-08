@@ -23,11 +23,16 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def convert_database_url(self) -> "Settings":
-        """Convert Render's postgres:// to postgresql+asyncpg:// for SQLAlchemy async."""
-        if self.database_url.startswith("postgres://"):
-            self.database_url = self.database_url.replace(
-                "postgres://", "postgresql+asyncpg://", 1
-            )
+        """Convert sync PostgreSQL URLs to async for SQLAlchemy.
+
+        Render provides postgres:// or postgresql:// — both need
+        postgresql+asyncpg:// for our async engine.
+        """
+        url = self.database_url
+        if url.startswith("postgres://"):
+            self.database_url = "postgresql+asyncpg://" + url[len("postgres://"):]
+        elif url.startswith("postgresql://"):
+            self.database_url = "postgresql+asyncpg://" + url[len("postgresql://"):]
         return self
 
     @property
