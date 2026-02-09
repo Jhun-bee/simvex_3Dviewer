@@ -294,6 +294,11 @@ export const ModelGroup_ai: React.FC<ModelGroupProps> = ({
           // Rapid rotation 20 full turns for high-speed effect
           rotation = [rotation[0], rotation[1] + explodeFactor * Math.PI * 40, rotation[2]];
         }
+
+        if (machinery.id === 'V4_Engine' && idNorm.includes('crankshaft')) {
+          // Crankshaft rotates 3 full turns during explosion (simulating engine operation)
+          rotation = [rotation[0], rotation[1], rotation[2] + explodeFactor * Math.PI * 6];
+        }
         // Check if part was matched in AI result
         // const pNorm = normalize(part.name);
         // const aiPart = aiResult?.parts.find(ap => {
