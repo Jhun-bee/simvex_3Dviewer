@@ -30,7 +30,7 @@ services:
         fromService:
           type: web
           name: simvex-backend
-          property: url
+          property: host
       - key: VITE_OPENAI_API_KEY
         sync: false
       - key: VITE_GOOGLE_API_KEY
