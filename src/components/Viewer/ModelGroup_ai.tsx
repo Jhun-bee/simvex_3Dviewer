@@ -138,7 +138,6 @@ export const ModelGroup_ai: React.FC<ModelGroupProps> = ({
         newScale = 100 / maxDim;
       }
 
-      console.log(`[ModelGroup] Base Part (${partName}) Size: ${maxDim.toFixed(3)}. Setting Global Scale: ${newScale}`);
       setGlobalScale(newScale);
       resolver.setGlobalScale(newScale); // Update resolver
     }
