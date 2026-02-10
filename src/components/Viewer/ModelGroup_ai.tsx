@@ -2,7 +2,7 @@
 // AI-powered ModelGroup with Constraint Resolver for tight assembly
 
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import { useGLTF, Html } from '@react-three/drei';
+import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { Machinery } from '../../types';
 import { useModelAnimations_ai } from '../../hooks/useModelAnimations_ai';
@@ -243,7 +243,8 @@ export const ModelGroup_ai: React.FC<ModelGroupProps> = ({
 
     machinery.parts.forEach((part, index) => {
       const id = part.name;
-      const assembledPos = new THREE.Vector3(...(part.position || [0, 0, 0]));
+      // [Phase 28] Multiply by globalScale to match scaled mesh
+      const assembledPos = new THREE.Vector3(...(part.position || [0, 0, 0])).multiplyScalar(globalScale);
 
       // 🔒 Ground parts (Crankshaft) — 고정, 분해 안 함
       if (part.isGround) {
@@ -262,9 +263,10 @@ export const ModelGroup_ai: React.FC<ModelGroupProps> = ({
       }
 
       // [Synchronous Differential Velocity - v0.5.0 Reversion]
-      const defaultTargetDistance = index * 40;
+      // [Phase 28] Scale explode distances by globalScale for proportional movement
+      const defaultTargetDistance = index * 40 * globalScale;
       const customDistance = part.explodeDistance;
-      const targetDistance = customDistance !== undefined ? customDistance : defaultTargetDistance;
+      const targetDistance = customDistance !== undefined ? customDistance * globalScale : defaultTargetDistance;
       const customSpeed = part.explodeSpeed ?? 1.0;
       const delay = part.explodeDelay ?? 0;
 
@@ -279,12 +281,12 @@ export const ModelGroup_ai: React.FC<ModelGroupProps> = ({
       map.set(id, finalPos);
     });
     return map;
-  }, [machinery.parts, explodeFactor, aiResult]);
+  }, [machinery.parts, explodeFactor, aiResult, globalScale]);
 
   // Final Merge
   const finalPositions = useMemo(() => {
     const normalizedId = machinery.id.toLowerCase().trim();
-    const isTunedModel = ['suspension', 'v4_engine', 'drone', 'robot arm', 'leaf spring', 'machine vice'].includes(normalizedId);
+    const isTunedModel = ['suspension', 'v4_engine', 'drone', 'robot arm', 'leaf spring', 'machine vice', 'robot gripper'].includes(normalizedId);
 
     if (isTunedModel) {
       console.log(`[ModelGroup] '${machinery.id}' detected as Tuned Model. Using MANUAL positions.`);
@@ -339,23 +341,6 @@ export const ModelGroup_ai: React.FC<ModelGroupProps> = ({
 
         return (
           <group key={part.name}>
-            <axesHelper args={[50]} position={[position.x, position.y, position.z]} />
-
-            <Html position={[position.x, position.y, position.z]} center distanceFactor={15}>
-              <div style={{
-                background: 'rgba(0,0,0,0.8)',
-                color: '#00ff00',
-                padding: '2px 6px',
-                borderRadius: '4px',
-                fontSize: '12px',
-                border: '1px solid #00ff00',
-                pointerEvents: 'none',
-                fontFamily: 'monospace'
-              }}>
-                {part.name}: {position.x.toFixed(1)}, {position.y.toFixed(1)}, {position.z.toFixed(1)}
-              </div>
-            </Html>
-
             <MachinePart
               partName={part.name}
               filePath={part.file}
