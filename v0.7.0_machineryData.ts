@@ -129,8 +129,8 @@ export const machineryData: Record<string, Machinery> = {
       // ====== Cylinder 4 ======
       { name: 'Connecting Rod #4', file: '/models/V4_Engine/Connecting Rod.glb', material: 'Forged Steel', role: '4번 커넥팅 로드', position: [50.7, 15, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 38, explodeDelay: 0.11, color: '#8C8C8C' },
       { name: 'Rod Cap #4', file: '/models/V4_Engine/Connecting Rod Cap.glb', material: 'Forged Steel', role: '4번 로드 캡', position: [50.7, -4.3, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, -1, 0], explodeDistance: 25, explodeDelay: 0.11, color: '#8C8C8C' },
-      { name: 'Conrod Bolt #4a', file: '/models/V4_Engine/Conrod Bolt.glb', material: 'High-Tensile Steel', role: '1번 볼트 (좌)', position: [50.7, -1.6, -3.5], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, -1, 0], explodeDistance: 44, explodeSpeed: 2.5, color: '#2A2A2A' },
-      { name: 'Conrod Bolt #4b', file: '/models/V4_Engine/Conrod Bolt.glb', material: 'High-Tensile Steel', role: '1번 볼트 (우)', position: [50.7, -1.6, 3.5], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, -1, 0], explodeDistance: 44, explodeSpeed: 2.5, color: '#2A2A2A' },
+      { name: 'Conrod Bolt #4a', file: '/models/V4_Engine/Conrod Bolt.glb', material: 'High-Tensile Steel', role: '4번 볼트 (좌)', position: [50.7, -1.6, -3.5], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, -1, 0], explodeDistance: 44, explodeSpeed: 2.5, color: '#2A2A2A' },
+      { name: 'Conrod Bolt #4b', file: '/models/V4_Engine/Conrod Bolt.glb', material: 'High-Tensile Steel', role: '4번 볼트 (우)', position: [50.7, -1.6, 3.5], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, -1, 0], explodeDistance: 44, explodeSpeed: 2.5, color: '#2A2A2A' },
       { name: 'Piston #4', file: '/models/V4_Engine/Piston.glb', material: 'Aluminum Alloy', role: '4번 피스톤', position: [50.7, 12, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 63, explodeDelay: 0.11, color: '#D4D4D4' },
       { name: 'Piston Pin #4', file: '/models/V4_Engine/Piston Pin.glb', material: 'Case-Hardened Steel', role: '4번 피스톤 핀', position: [54.7, 15, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [1, 0, 0], explodeDistance: 63, explodeSpeed: 2.5, color: '#B0B0B0' },
       { name: 'Piston Ring #4-1', file: '/models/V4_Engine/Piston Ring.glb', material: 'Cast Iron', role: '4번 1차 압축링', position: [50.7, 20, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 88, explodeDelay: 0.11, color: '#1A1A1A' },
@@ -435,14 +435,116 @@ export const machineryData: Record<string, Machinery> = {
     thumbnail: '/models/Machine Vice/공작 기계 바이스.jpg',
     preferredScale: 80,
     parts: [
+<<<<<<< HEAD
+      {
+        name: 'Base Plate',
+        file: '/models/Machine Vice/Part8-grundplatte.glb',
+        material: 'Cast Iron',
+        role: '작업대 고정용 기초판',
+        position: [0, 0, 0],
+        isGround: true,
+        explodeDirection: [0, 0, 0],
+        color: '#5A5A5A',  // Dark gray – cast iron base
+      },
+      {
+        name: 'Main Body',
+        file: '/models/Machine Vice/Part1.glb',
+        material: 'Cast Iron',
+        role: '바이스 본체 프레임',
+        position: [0, 0, 0],
+        explodeDirection: [0, 1, 0],
+        explodeDistance: 30,
+        color: '#708090',  // Slate gray – main body
+      },
+      {
+        name: 'Guide Housing',
+        file: '/models/Machine Vice/Part1 Fuhrung.glb',
+        material: 'Cast Iron',
+        role: '이동 조 안내 하우징',
+        position: [0, 0, 0],
+        explodeDirection: [0, 1, 0],
+        explodeDistance: 50,
+        color: '#7B8D8E',  // Pewter – guide housing
+      },
+      {
+        name: 'Guide Rail',
+        file: '/models/Machine Vice/Part6-fuhrungschiene.glb',
+        material: 'Hardened Steel',
+        role: '직진 운동 안내 레일',
+        position: [0, 0, 0],
+        explodeDirection: [0, 1, 0.5],
+        explodeDistance: 70,
+        color: '#B8860B',  // Dark goldenrod – precision rail
+      },
+      {
+        name: 'Fixed Jaw',
+        file: '/models/Machine Vice/Part2 Feste Backe.glb',
+        material: 'Steel',
+        role: '고정 조',
+        position: [0, 0, 0],
+        explodeDirection: [0, 0.5, 1],
+        explodeDistance: 60,
+        color: '#2E8B57',  // Sea green – fixed jaw
+      },
+      {
+        name: 'Movable Jaw',
+        file: '/models/Machine Vice/Part3-lose backe.glb',
+        material: 'Steel',
+        role: '이동 조',
+        position: [0, 0, 0],
+        explodeDirection: [0, 0.5, -1],
+        explodeDistance: 60,
+        color: '#3CB371',  // Medium sea green – movable jaw
+      },
+      {
+        name: 'Clamping Jaw',
+        file: '/models/Machine Vice/Part5-Spannbacke.glb',
+        material: 'Hardened Steel',
+        role: '교체형 클램핑 조',
+        position: [0, 0, 0],
+        explodeDirection: [0, 1, -1],
+        explodeDistance: 90,
+        color: '#228B22',  // Forest green – clamping surface
+      },
+      {
+        name: 'Spindle Socket',
+        file: '/models/Machine Vice/Part4 spindelsockel.glb',
+        material: 'Steel',
+        role: '스핀들 지지 소켓',
+        position: [0, 0, 0],
+        explodeDirection: [0, 0, -1],
+        explodeDistance: 80,
+        color: '#CD853F',  // Peru – spindle socket
+      },
+      {
+        name: 'Trapez Spindle',
+        file: '/models/Machine Vice/Part7-TrapezSpindel.glb',
+        material: 'Steel',
+        role: '사다리꼴 나사 스핀들',
+        position: [0, 0, 0],
+        explodeDirection: [0, 0, -1],
+        explodeDistance: 110,
+        color: '#DAA520',  // Goldenrod – spindle shaft
+      },
+      {
+        name: 'Pressure Sleeve',
+        file: '/models/Machine Vice/Part9-Druckhulse.glb',
+        material: 'Steel',
+        role: '축 방향 압력 전달 슬리브',
+        position: [0, 0, 0],
+        explodeDirection: [0, 0, -1],
+        explodeDistance: 130,
+        color: '#A0522D',  // Sienna – pressure sleeve
+      },
+=======
       // === 기초판 (Ground) === GLB: 18.5×12×1, center [9.25, 3.75, 0.5]
       { name: 'Base Plate', file: '/models/Machine Vice/Part8-grundplatte.glb', material: 'Wood/Cast Iron', role: '기초 베이스 판', position: [0, 0, 0], rotation: [0, 0, 0], isGround: true, explodeDirection: [0, 0, 0], color: '#8B4513' },
 
-      // === 본체 & 가이드 ===
+      // === 본체 & 가이드 === 
       { name: 'Guide Body', file: '/models/Machine Vice/Part1 Fuhrung.glb', material: 'Cast Iron', role: '이동조 안내 가이드', position: [2.25, 1, 3.5], rotation: [0, 0, 0], explodeDirection: [0, 1, 0], explodeDistance: 15, color: '#404040' },
       { name: 'Main Body', file: '/models/Machine Vice/Part1.glb', material: 'Cast Iron', role: '바이스 본체 블록', position: [5.5, 1, 0.5], rotation: [0, 0, 0], explodeDirection: [0, 1, 0], explodeDistance: 10, color: '#505050' },
 
-      // === 고정 조 (Fixed Jaw) === GLB: 7.5×5.5×2.5, center [3.75, 2.75, 1.25]
+      // === 고정 조 (Fixed Jaw) === GLB: 7.5×5.5×2.5, center [3.75, 2.75, 1.25]  
       { name: 'Fixed Jaw', file: '/models/Machine Vice/Part2 Feste Backe.glb', material: 'Steel', role: '고정 조 (움직이지 않는 턱)', position: [5.5, 1, 3.5], rotation: [0, 0, 0], explodeDirection: [0, 0, 1], explodeDistance: 20, color: '#2D2D2D' },
 
       // === 스핀들 소켓 === GLB: 3.5×5.5×2, center [1.75, 2.75, 1]
@@ -464,62 +566,23 @@ export const machineryData: Record<string, Machinery> = {
 
       // === 압력 슬리브 (손잡이 끝) === GLB: 1.6×1.6×0.85
       { name: 'Pressure Sleeve', file: '/models/Machine Vice/Part9-Druckhulse.glb', material: 'Steel', role: '스핀들 핸들 압력 슬리브', position: [9.25, 3.75, -15], rotation: [0, 0, 0], explodeDirection: [0, 0, -1], explodeDistance: 15, color: '#FFD700' },
+>>>>>>> d7ae60d (feat: V4 Engine explode animation - sequential 2-phase explosion, isGround fix, direction corrections)
     ],
   },
   'Robot Gripper': {
     id: 'Robot Gripper',
     name: '로봇 집게',
-    description: '기어-링크 메커니즘을 이용한 산업용 로봇 그리퍼입니다.',
+    description: '물체를 잡는 로봇 그리퍼입니다.',
     theory: `
 **작동 원리:**
-모터가 Base Gear(구동 피니언)를 회전시키면, 이것이 좌우 Gear Link 1/2(큰 기어)를 반대 방향으로 회전시킵니다.
-각 기어 링크에 연결된 Link(연결봉)가 Gripper(집게 조)를 안쪽/바깥쪽으로 밀어 물체를 잡거나 놓습니다.
-
-**주요 부품:**
-- Base Plate: 모든 부품이 장착되는 본체 프레임
-- Base Gear: 모터로부터 토크를 전달하는 구동 피니언 기어
-- Gear Link 1/2: 피니언과 맞물리는 대형 기어 (좌/우 대칭)
-- Link: 기어 회전을 직선 운동으로 변환하는 연결봉
-- Gripper: 물체를 실제로 잡는 집게 조
-- Pin: 각 관절을 연결하는 피벗 핀
+기어와 링크 기구로 집게 개폐
 `,
     thumbnail: '/models/Robot Gripper/로봇집게 조립도.png',
-    preferredScale: 80,
     parts: [
-      // === Base Plate (Ground) - 본체 프레임 ===
-      { name: 'Base Plate', file: '/models/Robot Gripper/Base Plate.glb', material: 'Aluminum Alloy', role: '그리퍼 본체 프레임 (모든 부품 장착 기반)', position: [0, 0, 0], isGround: true, explodeDirection: [0, 0, 0], color: '#7A7A8A' },
-
-      // === Base Mounting Bracket - 상단 체결 브래킷 ===
-      { name: 'Base Mounting Bracket', file: '/models/Robot Gripper/Base Mounting bracket.glb', material: 'Aluminum', role: '로봇 팔 연결용 마운팅 브래킷', position: [0, 3.5, 0], explodeDirection: [0, 1, 0], explodeDistance: 25, color: '#9090B0' },
-
-      // === Base Gear (Driving Pinion) - 구동 피니언 ===
-      { name: 'Base Gear', file: '/models/Robot Gripper/Base Gear.glb', material: 'Hardened Steel', role: '모터 구동 피니언 기어 (토크 입력)', position: [0, 1.5, 0], explodeDirection: [0, 1, 0], explodeDistance: 35, color: '#1A1A1A' },
-
-      // === Gear Link 1 (Left Large Gear) ===
-      { name: 'Gear Link 1', file: '/models/Robot Gripper/Gear link 1.glb', material: 'Engineering Plastic', role: '좌측 대형 기어 (피니언과 맞물림)', position: [-1.8, 0.5, 0], explodeDirection: [-1, 0.5, 0], explodeDistance: 30, color: '#8B2222' },
-
-      // === Gear Link 2 (Right Large Gear) ===
-      { name: 'Gear Link 2', file: '/models/Robot Gripper/Gear link 2.glb', material: 'Engineering Plastic', role: '우측 대형 기어 (피니언과 맞물림)', position: [1.8, 0.5, 0], explodeDirection: [1, 0.5, 0], explodeDistance: 30, color: '#CC8800' },
-
-      // === Link (Left Connecting Bar) ===
-      { name: 'Link Left', file: '/models/Robot Gripper/Link.glb', material: 'Steel', role: '좌측 연결 링크 (기어→집게 직선운동 변환)', position: [-2.0, -3.0, 0.3], explodeDirection: [-0.5, -1, 0], explodeDistance: 35, color: '#3366CC' },
-
-      // === Link (Right Connecting Bar) ===
-      { name: 'Link Right', file: '/models/Robot Gripper/Link.glb', material: 'Steel', role: '우측 연결 링크 (기어→집게 직선운동 변환)', position: [2.0, -3.0, 0.3], explodeDirection: [0.5, -1, 0], explodeDistance: 35, color: '#3366CC' },
-
-      // === Gripper Jaw (Left) ===
-      { name: 'Gripper Left', file: '/models/Robot Gripper/Gripper.glb', material: 'Hardened Steel', role: '좌측 집게 조 (물체 파지)', position: [-1.5, -7.0, 0], explodeDirection: [-1, -1, 0], explodeDistance: 40, color: '#CC2222' },
-
-      // === Gripper Jaw (Right, Mirrored) ===
-      { name: 'Gripper Right', file: '/models/Robot Gripper/Gripper.glb', material: 'Hardened Steel', role: '우측 집게 조 (물체 파지)', position: [1.5, -7.0, 0], rotation: [0, Math.PI, 0], explodeDirection: [1, -1, 0], explodeDistance: 40, color: '#CC2222' },
-
-      // === Pivot Pins (assembly joints) ===
-      { name: 'Pin #1 (Gear Pivot L)', file: '/models/Robot Gripper/Pin.glb', material: 'Stainless Steel', role: '좌측 기어 피벗 핀', position: [-1.8, 1.5, 0], explodeDirection: [0, 0, 1], explodeDistance: 20, explodeSpeed: 2.0, color: '#C0C0C0' },
-      { name: 'Pin #2 (Gear Pivot R)', file: '/models/Robot Gripper/Pin.glb', material: 'Stainless Steel', role: '우측 기어 피벗 핀', position: [1.8, 1.5, 0], explodeDirection: [0, 0, 1], explodeDistance: 20, explodeSpeed: 2.0, color: '#C0C0C0' },
-      { name: 'Pin #3 (Link-Gear L)', file: '/models/Robot Gripper/Pin.glb', material: 'Stainless Steel', role: '좌측 링크-기어 연결 핀', position: [-2.5, -1.0, 0], explodeDirection: [0, 0, 1], explodeDistance: 22, explodeSpeed: 2.0, color: '#C0C0C0' },
-      { name: 'Pin #4 (Link-Gear R)', file: '/models/Robot Gripper/Pin.glb', material: 'Stainless Steel', role: '우측 링크-기어 연결 핀', position: [2.5, -1.0, 0], explodeDirection: [0, 0, 1], explodeDistance: 22, explodeSpeed: 2.0, color: '#C0C0C0' },
-      { name: 'Pin #5 (Link-Grip L)', file: '/models/Robot Gripper/Pin.glb', material: 'Stainless Steel', role: '좌측 링크-집게 연결 핀', position: [-2.0, -5.0, 0], explodeDirection: [0, 0, 1], explodeDistance: 24, explodeSpeed: 2.0, color: '#C0C0C0' },
-      { name: 'Pin #6 (Link-Grip R)', file: '/models/Robot Gripper/Pin.glb', material: 'Stainless Steel', role: '우측 링크-집게 연결 핀', position: [2.0, -5.0, 0], explodeDirection: [0, 0, 1], explodeDistance: 24, explodeSpeed: 2.0, color: '#C0C0C0' },
+      { name: 'Base Plate', file: '/models/Robot Gripper/Base Plate.glb', material: 'Aluminum', role: '그리퍼 베이스', position: [0, 0, 0], isGround: true, explodeDirection: [0, 0, 0] },
+      { name: 'Mounting bracket', file: '/models/Robot Gripper/Base Mounting bracket.glb', material: 'Aluminum', role: '마운팅 브래킷', position: [0, 15, 0], explodeDirection: [0, 1, 0] },
+      { name: 'Left Jaw', file: '/models/Robot Gripper/Gripper.glb', material: 'Aluminum', role: '왼쪽 집게 조', position: [-20, 30, 0], explodeDirection: [-1, 1, 0] },
+      { name: 'Right Jaw', file: '/models/Robot Gripper/Gripper.glb', material: 'Aluminum', role: '오른쪽 집게 조', position: [20, 30, 0], explodeDirection: [1, 1, 0] },
     ],
   },
 };
