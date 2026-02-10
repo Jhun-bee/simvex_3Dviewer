@@ -37,13 +37,23 @@ export function useModelLoader(machinery: Machinery) {
                 const part = machinery.parts[index];
                 const model = gltf.scene.clone(); // Clone to allow re-use if needed
 
-                // Enable shadows
+                // Enable shadows and apply color
                 model.traverse((child: any) => {
                     if (child instanceof THREE.Mesh) {
                         child.castShadow = true;
                         child.receiveShadow = true;
                         if (child.material) {
                             child.material.envMapIntensity = 1;
+
+                            // Apply custom color if specified in data
+                            if (part.color) {
+                                child.material.color.set(part.color);
+                                if (child.material instanceof THREE.MeshStandardMaterial) {
+                                    child.material.metalness = 0.7;
+                                    child.material.roughness = 0.3;
+                                }
+                            }
+
                             child.material.needsUpdate = true;
                         }
                     }
