@@ -13,13 +13,14 @@ interface ViewerPageProps {
 
 export default function ViewerPage({ machineryId }: ViewerPageProps) {
   const machinery = machineryData[machineryId];
-  const { selectedPart, explodeFactor, setExplodeFactor } = useViewerStore();
+  const { selectedPart, explodeFactor, setExplodeFactor, setSelectedPart } = useViewerStore();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // Ensure 0% (Assembled) is the default state when entering
+  // Ensure clean state when entering a device viewer
   useEffect(() => {
     setExplodeFactor(0);
-  }, [setExplodeFactor]);
+    setSelectedPart(null);
+  }, [machineryId, setExplodeFactor, setSelectedPart]);
 
   if (!machinery) {
     return <div>기계를 찾을 수 없습니다.</div>;
@@ -48,7 +49,7 @@ export default function ViewerPage({ machineryId }: ViewerPageProps) {
         {/* 완제품 정보 패널 */}
         {!selectedPart && (
           <div className="absolute top-4 left-4 max-w-md">
-            <ProductInfo machinery={machinery} />
+            <ProductInfo key={machinery.id} machinery={machinery} />
           </div>
         )}
 
