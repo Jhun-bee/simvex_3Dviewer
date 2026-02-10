@@ -3,7 +3,7 @@ services:
   - type: web
     name: simvex-backend
     env: python
-    region: singapore # or oregon, frankfurt, etc.
+    region: singapore
     plan: free
     rootDir: backend
     buildCommand: pip install -r requirements.txt
@@ -12,25 +12,26 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: OPENAI_API_KEY
-        sync: false # User will input this in dashboard
+        sync: false
     autoDeploy: true
 
-  # 2. Frontend Static Site (React/Vite)
-  - type: static
+  # 2. Frontend Web Service (Node.js serving Static Files)
+  # Switched from 'static' to 'web' to resolve "unknown type static" error
+  - type: web
     name: simvex-frontend
-    env: static
+    env: node
     region: singapore
     plan: free
     rootDir: .
     buildCommand: npm install && npm run build
-    staticPublishPath: ./dist
+    startCommand: npx serve -s dist -l $PORT
     envVars:
       - key: VITE_API_BASE_URL
         fromService:
           type: web
           name: simvex-backend
           property: url
-          envVarKey: VITE_API_BASE_URL # Optional: maps service URL to this env var
+          envVarKey: VITE_API_BASE_URL
       - key: VITE_OPENAI_API_KEY
         sync: false
       - key: VITE_GOOGLE_API_KEY
