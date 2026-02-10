@@ -169,18 +169,23 @@ export default function ModelGroup({ machinery, physicsEnabled }: ModelGroupProp
 
       // Find part metadata for explosion properties
       const partData = machinery.parts.find(p => p.name === partName);
-      const explodeDirection = partData?.explodeDirection;
       const isGround = partData?.isGround;
-      const assemblyOffset = partData?.assemblyOffset;  // ✅ NEW: assemblyOffset 추가
 
-      // ✅ UPDATED: assemblyOffset 전달
+      // 🔒 Ground parts (Crankshaft) — NEVER move, skip everything
+      if (isGround) return;
+
+      const explodeDirection = partData?.explodeDirection;
+      const explodeDistance = partData?.explodeDistance;
+      const assemblyOffset = partData?.assemblyOffset;
+
       const targetPos = calculateExplodePosition(
         originalPos,
         center,
         explodeFactor,
         explodeDirection,
         isGround,
-        assemblyOffset  // ✅ NEW: 조립 위치 전달
+        assemblyOffset,
+        explodeDistance
       );
       model.position.lerp(targetPos, 0.1);
 

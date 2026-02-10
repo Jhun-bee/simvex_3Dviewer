@@ -28,6 +28,7 @@ export function useModelAnimations(explodeFactor: number, selectedPart: string |
    * @param explodeDirection - Optional explicit direction vector
    * @param isGround - If true, part stays fixed
    * @param assemblyOffset - Assembled position offset (NEW!)
+   * @param partExplodeDistance - Per-part explode distance (NEW!)
    */
   const calculateExplodePosition = (
     originalPos: THREE.Vector3,
@@ -35,11 +36,12 @@ export function useModelAnimations(explodeFactor: number, selectedPart: string |
     factor: number,
     explodeDirection?: [number, number, number],
     isGround?: boolean,
-    assemblyOffset?: [number, number, number]  // ✅ NEW: 조립 위치
+    assemblyOffset?: [number, number, number],  // ✅ NEW: 조립 위치
+    partExplodeDistance?: number                  // ✅ NEW: 부품별 분해 거리
   ): THREE.Vector3 => {
-    // Ground parts don't move
+    // Ground parts don't move — 원래 위치 그대로 유지
     if (isGround) {
-      return new THREE.Vector3(0, 0, 0);
+      return originalPos.clone();
     }
 
     // ✅ NEW: 조립 위치 계산 (assemblyOffset 우선, 없으면 originalPos 사용)
@@ -49,7 +51,6 @@ export function useModelAnimations(explodeFactor: number, selectedPart: string |
 
     // ✅ NEW: factor === 0 이면 조립 상태 (assemblyPos 반환)
     if (factor === 0) {
-      console.log(`📍 [조립] 부품이 조립 위치로 이동: [${assemblyPos.x}, ${assemblyPos.y}, ${assemblyPos.z}]`);
       return assemblyPos;
     }
 
@@ -71,13 +72,13 @@ export function useModelAnimations(explodeFactor: number, selectedPart: string |
       }
     }
 
-    const explodeDistance = factor * 150; // Scale for visibility
+    // ✅ UPDATED: 부품별 explodeDistance 사용 (없으면 기본 150)
+    const maxDistance = partExplodeDistance ?? 150;
+    const explodeDistance = factor * maxDistance;
     const explodeOffset = direction.multiplyScalar(explodeDistance);
 
     // ✅ NEW: 조립 위치에서 explodeOffset만큼 이동
     const explodedPos = assemblyPos.clone().add(explodeOffset);
-
-    console.log(`💥 [분해] factor=${factor.toFixed(2)}, 이동 거리: ${explodeDistance.toFixed(1)}`);
 
     return explodedPos;
   };

@@ -29,6 +29,7 @@ export interface MachineryPart {
   explodeDirection?: [number, number, number]; // Direction vector for explosion (normalized)
   explodeDistance?: number; // Custom maximum distance for this part
   explodeSpeed?: number;    // Custom speed multiplier for this part
+  explodeDelay?: number;    // Delay before this part starts exploding (0-1 range, e.g. 0.3 = starts at 30% slider)
   rotation?: [number, number, number]; // [x, y, z] initial rotation in radians
   isGround?: boolean; // If true, this part stays fixed during explosion
   color?: string; // Optional: Override part color (hex)

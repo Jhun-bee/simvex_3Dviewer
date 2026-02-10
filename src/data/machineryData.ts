@@ -90,13 +90,52 @@ export const machineryData: Record<string, Machinery> = {
     thumbnail: '/models/V4_Engine/V4실린더 엔진 조립도.png',
     preferredScale: 60,
     parts: [
-      { name: 'Crankshaft', file: '/models/V4_Engine/Crankshaft.glb', material: 'Steel', role: '왕복↔회전 변환 메인 크랭크축', position: [0, 0, 0], rotation: [0, 0, 0], isGround: true, explodeDirection: [0, 0, 0], color: '#A0A0A0' },
-      { name: 'Rod Cap', file: '/models/V4_Engine/Connecting Rod Cap.glb', material: 'Steel', role: '커넥팅 로드 빅엔드 하부 캡', position: [0, -1.0, 0], rotation: [0, 0, 0], explodeDirection: [0, -1, 0], explodeDistance: 20, color: '#808080' },
-      { name: 'Conrod Bolt', file: '/models/V4_Engine/Conrod Bolt.glb', material: 'Steel', role: '캡 체결 볼트', position: [0, -2.0, 0], rotation: [0, 0, 0], explodeDirection: [0, -1, 0], explodeDistance: 40, color: '#DAA520' }, // Goldenish bolt
-      { name: 'Connecting Rod', file: '/models/V4_Engine/Connecting Rod.glb', material: 'Steel', role: '직선↔회전 운동 변환 로드', position: [0, 0, 0], rotation: [0, 0, 0], explodeDirection: [0, 1, 0], explodeDistance: 30, color: '#707070' },
-      { name: 'Piston Pin', file: '/models/V4_Engine/Piston Pin.glb', material: 'Steel', role: '피스톤 리스트 핀', position: [0, 5.2, 0], rotation: [0, 0, 0], explodeDirection: [1, 0, 0], explodeDistance: 50, color: '#C0C0C0' },
-      { name: 'Piston', file: '/models/V4_Engine/Piston.glb', material: 'Aluminum', role: '연소 압력 수용 피스톤', position: [0, 5.2, 0], rotation: [0, 0, 0], explodeDirection: [0, 1, 0], explodeDistance: 60, color: '#E0E0E0' },
-      { name: 'Piston Ring', file: '/models/V4_Engine/Piston Ring.glb', material: 'Cast Iron', role: '기밀 유지 피스톤 링', position: [0, 7.5, 0], rotation: [0, 0, 0], explodeDirection: [0, 1, 0], explodeDistance: 80, color: '#333333' },
+      // === Crankshaft (Ground) === GLB: 58.9×16×14.4, Y: -8 to 8
+      { name: 'Crankshaft', file: '/models/V4_Engine/Crankshaft.glb', material: 'Forged Steel', role: '왕복↔회전 변환 메인 크랭크축 (4기통)', position: [0, 0, 0], rotation: [0, 0, 0], isGround: true, explodeDirection: [0, 0, 0], color: '#8A8A8A' },
+
+      // ====== Cylinder 1 — Phase2: 로드/캡/피스톤/링은 delay=0.35, Phase1: 핀/볼트는 즉시(speed=2.5) ======
+      { name: 'Connecting Rod #1', file: '/models/V4_Engine/Connecting Rod.glb', material: 'Forged Steel', role: '1번 커넥팅 로드', position: [15.9, 15, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 38, explodeDelay: 0.11, color: '#8C8C8C' },
+      { name: 'Rod Cap #1', file: '/models/V4_Engine/Connecting Rod Cap.glb', material: 'Forged Steel', role: '1번 로드 캡', position: [15.9, -4.3, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, -1, 0], explodeDistance: 25, explodeDelay: 0.11, color: '#8C8C8C' },
+      { name: 'Conrod Bolt #1a', file: '/models/V4_Engine/Conrod Bolt.glb', material: 'High-Tensile Steel', role: '1번 볼트 (좌)', position: [15.9, -1.6, -3.5], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, -1, 0], explodeDistance: 44, explodeSpeed: 2.5, color: '#2A2A2A' },
+      { name: 'Conrod Bolt #1b', file: '/models/V4_Engine/Conrod Bolt.glb', material: 'High-Tensile Steel', role: '1번 볼트 (우)', position: [15.9, -1.6, 3.5], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, -1, 0], explodeDistance: 44, explodeSpeed: 2.5, color: '#2A2A2A' },
+      { name: 'Piston #1', file: '/models/V4_Engine/Piston.glb', material: 'Aluminum Alloy', role: '1번 피스톤', position: [15.9, 12, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 63, explodeDelay: 0.11, color: '#D4D4D4' },
+      { name: 'Piston Pin #1', file: '/models/V4_Engine/Piston Pin.glb', material: 'Case-Hardened Steel', role: '1번 피스톤 핀', position: [20, 15, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [-1, 0, 0], explodeDistance: 63, explodeSpeed: 2.5, color: '#B0B0B0' },
+      { name: 'Piston Ring #1-1', file: '/models/V4_Engine/Piston Ring.glb', material: 'Cast Iron', role: '1번 1차 압축링', position: [15.9, 20, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 88, explodeDelay: 0.11, color: '#1A1A1A' },
+      { name: 'Piston Ring #1-2', file: '/models/V4_Engine/Piston Ring.glb', material: 'Cast Iron', role: '1번 2차 압축링', position: [15.9, 19, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 94, explodeDelay: 0.11, color: '#1A1A1A' },
+      { name: 'Piston Ring #1-3', file: '/models/V4_Engine/Piston Ring.glb', material: 'Steel', role: '1번 오일링', position: [15.9, 18, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 100, explodeDelay: 0.11, color: '#333333' },
+
+      // ====== Cylinder 2 ======
+      { name: 'Connecting Rod #2', file: '/models/V4_Engine/Connecting Rod.glb', material: 'Forged Steel', role: '2번 커넥팅 로드', position: [27.5, 24, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 38, explodeDelay: 0.11, color: '#8C8C8C' },
+      { name: 'Rod Cap #2', file: '/models/V4_Engine/Connecting Rod Cap.glb', material: 'Forged Steel', role: '2번 로드 캡', position: [27.5, 4.5, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, -1, 0], explodeDistance: 25, explodeDelay: 0.11, color: '#8C8C8C' },
+      { name: 'Conrod Bolt #2a', file: '/models/V4_Engine/Conrod Bolt.glb', material: 'High-Tensile Steel', role: '2번 볼트 (좌)', position: [27.5, 7.4, -3.5], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, -1, 0], explodeDistance: 44, explodeSpeed: 2.5, color: '#2A2A2A' },
+      { name: 'Conrod Bolt #2b', file: '/models/V4_Engine/Conrod Bolt.glb', material: 'High-Tensile Steel', role: '2번 볼트 (우)', position: [27.5, 7.4, 3.5], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, -1, 0], explodeDistance: 44, explodeSpeed: 2.5, color: '#2A2A2A' },
+      { name: 'Piston #2', file: '/models/V4_Engine/Piston.glb', material: 'Aluminum Alloy', role: '2번 피스톤', position: [27.5, 21, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 63, explodeDelay: 0.11, color: '#D4D4D4' },
+      { name: 'Piston Pin #2', file: '/models/V4_Engine/Piston Pin.glb', material: 'Case-Hardened Steel', role: '2번 피스톤 핀', position: [31.6, 21.7, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [-1, 0, 0], explodeDistance: 63, explodeSpeed: 2.5, color: '#B0B0B0' },
+      { name: 'Piston Ring #2-1', file: '/models/V4_Engine/Piston Ring.glb', material: 'Cast Iron', role: '2번 1차 압축링', position: [27.5, 29, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 88, explodeDelay: 0.11, color: '#1A1A1A' },
+      { name: 'Piston Ring #2-2', file: '/models/V4_Engine/Piston Ring.glb', material: 'Cast Iron', role: '2번 2차 압축링', position: [27.5, 28, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 94, explodeDelay: 0.11, color: '#1A1A1A' },
+      { name: 'Piston Ring #2-3', file: '/models/V4_Engine/Piston Ring.glb', material: 'Steel', role: '2번 오일링', position: [27.5, 27, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 100, explodeDelay: 0.11, color: '#333333' },
+
+      // ====== Cylinder 3 ======
+      { name: 'Connecting Rod #3', file: '/models/V4_Engine/Connecting Rod.glb', material: 'Forged Steel', role: '3번 커넥팅 로드', position: [39.1, 24, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 38, explodeDelay: 0.11, color: '#8C8C8C' },
+      { name: 'Rod Cap #3', file: '/models/V4_Engine/Connecting Rod Cap.glb', material: 'Forged Steel', role: '3번 로드 캡', position: [39.1, 4.5, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, -1, 0], explodeDistance: 25, explodeDelay: 0.11, color: '#8C8C8C' },
+      { name: 'Conrod Bolt #3a', file: '/models/V4_Engine/Conrod Bolt.glb', material: 'High-Tensile Steel', role: '3번 볼트 (좌)', position: [39.1, 7.4, -3.5], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, -1, 0], explodeDistance: 44, explodeSpeed: 2.5, color: '#2A2A2A' },
+      { name: 'Conrod Bolt #3b', file: '/models/V4_Engine/Conrod Bolt.glb', material: 'High-Tensile Steel', role: '3번 볼트 (우)', position: [39.1, 7.4, 3.5], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, -1, 0], explodeDistance: 44, explodeSpeed: 2.5, color: '#2A2A2A' },
+      { name: 'Piston #3', file: '/models/V4_Engine/Piston.glb', material: 'Aluminum Alloy', role: '3번 피스톤', position: [39.1, 21, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 63, explodeDelay: 0.11, color: '#D4D4D4' },
+      { name: 'Piston Pin #3', file: '/models/V4_Engine/Piston Pin.glb', material: 'Case-Hardened Steel', role: '3번 피스톤 핀', position: [43.2, 24, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [1, 0, 0], explodeDistance: 63, explodeSpeed: 2.5, color: '#B0B0B0' },
+      { name: 'Piston Ring #3-1', file: '/models/V4_Engine/Piston Ring.glb', material: 'Cast Iron', role: '3번 1차 압축링', position: [39.1, 29, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 88, explodeDelay: 0.11, color: '#1A1A1A' },
+      { name: 'Piston Ring #3-2', file: '/models/V4_Engine/Piston Ring.glb', material: 'Cast Iron', role: '3번 2차 압축링', position: [39.1, 28, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 94, explodeDelay: 0.11, color: '#1A1A1A' },
+      { name: 'Piston Ring #3-3', file: '/models/V4_Engine/Piston Ring.glb', material: 'Steel', role: '3번 오일링', position: [39.1, 27, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 100, explodeDelay: 0.11, color: '#333333' },
+
+      // ====== Cylinder 4 ======
+      { name: 'Connecting Rod #4', file: '/models/V4_Engine/Connecting Rod.glb', material: 'Forged Steel', role: '4번 커넥팅 로드', position: [50.7, 15, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 38, explodeDelay: 0.11, color: '#8C8C8C' },
+      { name: 'Rod Cap #4', file: '/models/V4_Engine/Connecting Rod Cap.glb', material: 'Forged Steel', role: '4번 로드 캡', position: [50.7, -4.3, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, -1, 0], explodeDistance: 25, explodeDelay: 0.11, color: '#8C8C8C' },
+      { name: 'Conrod Bolt #4a', file: '/models/V4_Engine/Conrod Bolt.glb', material: 'High-Tensile Steel', role: '4번 볼트 (좌)', position: [50.7, -1.6, -3.5], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, -1, 0], explodeDistance: 44, explodeSpeed: 2.5, color: '#2A2A2A' },
+      { name: 'Conrod Bolt #4b', file: '/models/V4_Engine/Conrod Bolt.glb', material: 'High-Tensile Steel', role: '4번 볼트 (우)', position: [50.7, -1.6, 3.5], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, -1, 0], explodeDistance: 44, explodeSpeed: 2.5, color: '#2A2A2A' },
+      { name: 'Piston #4', file: '/models/V4_Engine/Piston.glb', material: 'Aluminum Alloy', role: '4번 피스톤', position: [50.7, 12, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 63, explodeDelay: 0.11, color: '#D4D4D4' },
+      { name: 'Piston Pin #4', file: '/models/V4_Engine/Piston Pin.glb', material: 'Case-Hardened Steel', role: '4번 피스톤 핀', position: [54.7, 15, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [1, 0, 0], explodeDistance: 63, explodeSpeed: 2.5, color: '#B0B0B0' },
+      { name: 'Piston Ring #4-1', file: '/models/V4_Engine/Piston Ring.glb', material: 'Cast Iron', role: '4번 1차 압축링', position: [50.7, 20, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 88, explodeDelay: 0.11, color: '#1A1A1A' },
+      { name: 'Piston Ring #4-2', file: '/models/V4_Engine/Piston Ring.glb', material: 'Cast Iron', role: '4번 2차 압축링', position: [50.7, 19, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 94, explodeDelay: 0.11, color: '#1A1A1A' },
+      { name: 'Piston Ring #4-3', file: '/models/V4_Engine/Piston Ring.glb', material: 'Steel', role: '4번 오일링', position: [50.7, 18, 0], rotation: [0, Math.PI / 2, 0], explodeDirection: [0, 1, 0], explodeDistance: 100, explodeDelay: 0.11, color: '#333333' },
     ],
   },
   Drone: {
@@ -396,6 +435,7 @@ export const machineryData: Record<string, Machinery> = {
     thumbnail: '/models/Machine Vice/공작 기계 바이스.jpg',
     preferredScale: 80,
     parts: [
+<<<<<<< HEAD
       {
         name: 'Base Plate',
         file: '/models/Machine Vice/Part8-grundplatte.glb',
@@ -496,6 +536,37 @@ export const machineryData: Record<string, Machinery> = {
         explodeDistance: 130,
         color: '#A0522D',  // Sienna – pressure sleeve
       },
+=======
+      // === 기초판 (Ground) === GLB: 18.5×12×1, center [9.25, 3.75, 0.5]
+      { name: 'Base Plate', file: '/models/Machine Vice/Part8-grundplatte.glb', material: 'Wood/Cast Iron', role: '기초 베이스 판', position: [0, 0, 0], rotation: [0, 0, 0], isGround: true, explodeDirection: [0, 0, 0], color: '#8B4513' },
+
+      // === 본체 & 가이드 === 
+      { name: 'Guide Body', file: '/models/Machine Vice/Part1 Fuhrung.glb', material: 'Cast Iron', role: '이동조 안내 가이드', position: [2.25, 1, 3.5], rotation: [0, 0, 0], explodeDirection: [0, 1, 0], explodeDistance: 15, color: '#404040' },
+      { name: 'Main Body', file: '/models/Machine Vice/Part1.glb', material: 'Cast Iron', role: '바이스 본체 블록', position: [5.5, 1, 0.5], rotation: [0, 0, 0], explodeDirection: [0, 1, 0], explodeDistance: 10, color: '#505050' },
+
+      // === 고정 조 (Fixed Jaw) === GLB: 7.5×5.5×2.5, center [3.75, 2.75, 1.25]  
+      { name: 'Fixed Jaw', file: '/models/Machine Vice/Part2 Feste Backe.glb', material: 'Steel', role: '고정 조 (움직이지 않는 턱)', position: [5.5, 1, 3.5], rotation: [0, 0, 0], explodeDirection: [0, 0, 1], explodeDistance: 20, color: '#2D2D2D' },
+
+      // === 스핀들 소켓 === GLB: 3.5×5.5×2, center [1.75, 2.75, 1]
+      { name: 'Spindle Socket', file: '/models/Machine Vice/Part4 spindelsockel.glb', material: 'Cast Iron', role: '스핀들 지지대/소켓', position: [7.5, 1, -3], rotation: [0, 0, 0], explodeDirection: [0, 0, -1], explodeDistance: 15, color: '#3D3D3D' },
+
+      // === 가이드 레일 2개 === GLB: 5×1.9×0.6
+      { name: 'Guide Rail L', file: '/models/Machine Vice/Part6-fuhrungschiene.glb', material: 'Steel', role: '좌측 슬라이드 가이드 레일', position: [2.5, 1, 1.5], rotation: [0, 0, 0], explodeDirection: [-1, 0, 0], explodeDistance: 20, color: '#B0B0B0' },
+      { name: 'Guide Rail R', file: '/models/Machine Vice/Part6-fuhrungschiene.glb', material: 'Steel', role: '우측 슬라이드 가이드 레일', position: [8.5, 1, 1.5], rotation: [0, 0, 0], explodeDirection: [1, 0, 0], explodeDistance: 20, color: '#B0B0B0' },
+
+      // === 사다리꼴 스핀들 === GLB: 1.9×1.9×15.5, center [0, 0, -5.75]
+      { name: 'Trapez Spindle', file: '/models/Machine Vice/Part7-TrapezSpindel.glb', material: 'Steel', role: '이동조 구동 사다리꼴 나사(스핀들)', position: [9.25, 3.75, -2], rotation: [0, 0, 0], explodeDirection: [0, 0, -1], explodeDistance: 30, color: '#DAA520' },
+
+      // === 이동 조 (Movable Jaw) === GLB: 7.5×3.5×5, center [3.75, 0.15, -2.5]
+      { name: 'Movable Jaw', file: '/models/Machine Vice/Part3-lose backe.glb', material: 'Steel', role: '이동 조 (스핀들로 이동하는 턱)', position: [5.5, 1.5, -2], rotation: [0, 0, 0], explodeDirection: [0, 0, -1], explodeDistance: 25, color: '#2D2D2D' },
+
+      // === 클램핑 표면판 (고정조+이동조용) === GLB: 7.7×2×0.8
+      { name: 'Clamping Jaw (Fixed)', file: '/models/Machine Vice/Part5-Spannbacke.glb', material: 'Hardened Steel', role: '고정조 표면 클램핑 판', position: [5.5, 2, 4.8], rotation: [0, 0, 0], explodeDirection: [0, 0, 1], explodeDistance: 12, color: '#1A1A1A' },
+      { name: 'Clamping Jaw (Movable)', file: '/models/Machine Vice/Part5-Spannbacke.glb', material: 'Hardened Steel', role: '이동조 표면 클램핑 판', position: [5.5, 2, -4.5], rotation: [0, Math.PI, 0], explodeDirection: [0, 0, -1], explodeDistance: 12, color: '#1A1A1A' },
+
+      // === 압력 슬리브 (손잡이 끝) === GLB: 1.6×1.6×0.85
+      { name: 'Pressure Sleeve', file: '/models/Machine Vice/Part9-Druckhulse.glb', material: 'Steel', role: '스핀들 핸들 압력 슬리브', position: [9.25, 3.75, -15], rotation: [0, 0, 0], explodeDirection: [0, 0, -1], explodeDistance: 15, color: '#FFD700' },
+>>>>>>> d7ae60d (feat: V4 Engine explode animation - sequential 2-phase explosion, isGround fix, direction corrections)
     ],
   },
   'Robot Gripper': {

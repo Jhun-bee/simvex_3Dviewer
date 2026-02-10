@@ -43,8 +43,14 @@ const MachinePart = ({
     if (color) {
       c.traverse((child) => {
         if (child instanceof THREE.Mesh) {
-          child.material = child.material.clone();
-          child.material.color.set(color);
+          // Create metallic material for realistic silver/dark silver rendering
+          const newMat = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(color),
+            metalness: 0.85,
+            roughness: 0.25,
+            envMapIntensity: 1.0,
+          });
+          child.material = newMat;
         }
       });
     }
@@ -239,6 +245,12 @@ export const ModelGroup_ai: React.FC<ModelGroupProps> = ({
       const id = part.name;
       const assembledPos = new THREE.Vector3(...(part.position || [0, 0, 0]));
 
+      // 🔒 Ground parts (Crankshaft) — 고정, 분해 안 함
+      if (part.isGround) {
+        map.set(id, assembledPos);
+        return;
+      }
+
       // Determine explode direction (Manual > AI metadata > Default Up)
       let dir = new THREE.Vector3(0, 1, 0);
       if (part.explodeDirection) {
@@ -254,8 +266,11 @@ export const ModelGroup_ai: React.FC<ModelGroupProps> = ({
       const customDistance = part.explodeDistance;
       const targetDistance = customDistance !== undefined ? customDistance : defaultTargetDistance;
       const customSpeed = part.explodeSpeed ?? 1.0;
+      const delay = part.explodeDelay ?? 0;
 
-      const animFactor = Math.min(1.0, explodeFactor * customSpeed);
+      // delay 적용: 슬라이더가 delay 지점을 넘어야 움직이기 시작
+      const delayedFactor = Math.max(0, (explodeFactor - delay) / (1 - delay));
+      const animFactor = Math.min(1.0, delayedFactor * customSpeed);
 
       const finalPos = assembledPos.clone().add(
         dir.clone().multiplyScalar(targetDistance * animFactor)
@@ -313,10 +328,7 @@ export const ModelGroup_ai: React.FC<ModelGroupProps> = ({
           rotation = [rotation[0], rotation[1] + explodeFactor * Math.PI * 40, rotation[2]];
         }
 
-        if (machinery.id === 'V4_Engine' && idNorm.includes('crankshaft')) {
-          // Crankshaft rotates 3 full turns during explosion (simulating engine operation)
-          rotation = [rotation[0], rotation[1], rotation[2] + explodeFactor * Math.PI * 6];
-        }
+        // 🔒 [REMOVED] Crankshaft rotation — 크랭크샤프트는 isGround로 완전 고정
         // Check if part was matched in AI result
         // const pNorm = normalize(part.name);
         // const aiPart = aiResult?.parts.find(ap => {
