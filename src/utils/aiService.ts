@@ -1,6 +1,13 @@
 /// <reference types="vite/client" />
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+let BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+
+// Auto-correct: Ensure URL ends with /api/v1
+if (BASE_URL && !BASE_URL.includes('/api/v1')) {
+  BASE_URL = BASE_URL.replace(/\/$/, '') + '/api/v1';
+}
+
+const API_BASE_URL = BASE_URL;
 
 // Fallback to direct OpenAI if no backend configured
 const useBackend = !!import.meta.env.VITE_API_BASE_URL;
@@ -76,7 +83,7 @@ export async function sendMessageToAI(
     ];
 
     const response = await openai.chat.completions.create({
-      model: 'gpt-5-mini',
+      model: 'gpt-4o-mini',
       messages,
       temperature: 0.7,
       max_tokens: 500,

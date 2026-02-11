@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [v0.8.2] - 2026-02-11
+
+### Fixed
+- **AI API 연결성 개선**: `VITE_API_BASE_URL`에 `/api/v1` 경로가 누락된 경우 자동으로 보정하도록 수정 (Render 등 클라우드 배포 환경 대응).
+- **LLM 모델명 정상화**: 존재하지 않는 `gpt-5-mini` 모델명을 실제 모델인 `gpt-4o-mini`로 일괄 교정.
+
 ## [v0.8.1] - 2026-02-11
 
 ### Changed
