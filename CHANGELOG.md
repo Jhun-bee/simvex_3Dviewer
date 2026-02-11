@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [v0.6.0] - 2026-02-11
+## [v0.8.1] - 2026-02-11
 
 ### Changed
 - **데이터 구조 완전 모듈화**: `src/data/machinery/` 폴더로 각 기계 데이터를 독립 파일로 분리. 기계 간 간섭 없이 독립적인 좌표 튜닝 가능하도록 구조 리팩토링.
