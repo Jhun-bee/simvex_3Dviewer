@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [v0.8.4] - 2026-02-11
+
+### Fixed
+- **API 연결 안정성 강화**: 프로토콜(https://)이 누락된 백엔드 URL을 자동으로 보정하는 로직 추가.
+- **환경 변수 오타 대응**: 프론트엔드 폴백용 환경 변수명 오타(`VITE_OPENAI_AI_KEY`)를 자동으로 감지하여 지원.
+
 ## [v0.8.3] - 2026-02-11
 
 ### Fixed

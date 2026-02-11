@@ -2,9 +2,17 @@
 
 let BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
 
-// Auto-correct: Ensure URL ends with /api/v1
-if (BASE_URL && !BASE_URL.includes('/api/v1')) {
-  BASE_URL = BASE_URL.replace(/\/$/, '') + '/api/v1';
+// Auto-correct: Ensure URL has protocol and ends with /api/v1
+if (BASE_URL) {
+  // Add protocol if missing (common in Render host property)
+  if (!BASE_URL.startsWith('http')) {
+    const isLocal = BASE_URL.includes('localhost') || BASE_URL.includes('127.0.0.1');
+    BASE_URL = `${isLocal ? 'http' : 'https'}://${BASE_URL}`;
+  }
+  // Ensure path exists
+  if (!BASE_URL.includes('/api/v1')) {
+    BASE_URL = BASE_URL.replace(/\/$/, '') + '/api/v1';
+  }
 }
 
 const API_BASE_URL = BASE_URL;
@@ -15,7 +23,8 @@ const useBackend = !!import.meta.env.VITE_API_BASE_URL;
 // Keep legacy OpenAI support for backwards compatibility
 import OpenAI from 'openai';
 
-const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+// Support both API_KEY and AI_KEY typo
+const apiKey = import.meta.env.VITE_OPENAI_API_KEY || (import.meta.env as any).VITE_OPENAI_AI_KEY;
 
 const openai = apiKey ? new OpenAI({
   apiKey,
