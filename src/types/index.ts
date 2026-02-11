@@ -33,6 +33,7 @@ export interface MachineryPart {
   rotation?: [number, number, number]; // [x, y, z] initial rotation in radians
   isGround?: boolean; // If true, this part stays fixed during explosion
   color?: string; // Optional: Override part color (hex)
+  centerMesh?: boolean; // Optional: Whether to force center the mesh to [0,0,0] in its group
   // v0.3.3: Constraint 기반 조립 시스템
   constraint?: AssemblyConstraint;
 }

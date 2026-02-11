@@ -11,7 +11,7 @@ import { useEffect, Suspense } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { PerspectiveCamera, Environment, Html, GizmoHelper, GizmoViewport, TrackballControls } from '@react-three/drei';
 import { Machinery } from '../../types';
-import { ModelGroup_ai } from './ModelGroup_ai';
+import ModelGroup from './ModelGroup';
 import { useViewerStore } from '../../stores/viewerStore';
 
 // Hook Import
@@ -55,9 +55,6 @@ export default function Scene3D({ machinery }: Scene3DProps) {
   const {
     physicsEnabled,
     showGrid,
-    explodeFactor,
-    selectedPart,
-    setSelectedPart,
     cameraPosition,
     cameraTarget
   } = useViewerStore();
@@ -108,11 +105,9 @@ export default function Scene3D({ machinery }: Scene3DProps) {
         </Html>
       }>
         <PhysicsWrapper debug={physicsEnabled}>
-          <ModelGroup_ai
+          <ModelGroup
             machinery={machinery}
-            explodeFactor={explodeFactor}
-            selectedPart={selectedPart}
-            onPartClick={setSelectedPart}
+            physicsEnabled={physicsEnabled}
           />
         </PhysicsWrapper>
       </Suspense>
