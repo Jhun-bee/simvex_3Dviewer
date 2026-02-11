@@ -37,7 +37,19 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins_list(self) -> list[str]:
-        return [origin.strip() for origin in self.cors_origins.split(",")]
+        # Handle JSON format like ["http://..."] or comma-separated string
+        val = self.cors_origins.strip()
+        if val.startswith("[") and val.endswith("]"):
+            import json
+            try:
+                return json.loads(val)
+            except:
+                pass
+        
+        # Fallback to comma separation
+        origins = [origin.strip() for origin in val.split(",")]
+        # Also allow wildcard in debug/dev if needed, or if specified
+        return origins
 
     @property
     def is_postgres(self) -> bool:

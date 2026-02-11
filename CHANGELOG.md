@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [v0.8.5] - 2026-02-11
+
+### Fixed
+- **CORS 설정 안정화**: 백엔드에서 `CORS_ORIGINS`가 JSON 리스트 형식(`.env`)일 경우를 대비한 파싱 로직 강화.
+- **디버깅 가독성 향상**: API 키 오류 시 시도했던 백엔드 URL을 함께 출력하여 연결 상태를 쉽게 파악하도록 개선.
+
 ## [v0.8.4] - 2026-02-11
 
 ### Fixed

@@ -24,6 +24,7 @@ const useBackend = !!import.meta.env.VITE_API_BASE_URL;
 import OpenAI from 'openai';
 
 // Support both API_KEY and AI_KEY typo
+// Note: Vite requires literal access for static replacement
 const apiKey = import.meta.env.VITE_OPENAI_API_KEY || (import.meta.env as any).VITE_OPENAI_AI_KEY;
 
 const openai = apiKey ? new OpenAI({
@@ -76,7 +77,9 @@ export async function sendMessageToAI(
 
   // Fallback to direct OpenAI
   if (!openai) {
-    return 'OpenAI API Key가 설정되지 않았습니다. .env 파일을 확인해주세요.';
+    const errorMsg = `OpenAI API Key가 설정되지 않았습니다. (Backend: ${API_BASE_URL})`;
+    console.error(errorMsg);
+    return `${errorMsg}\n.env 파일 또는 Render 환경 변수를 확인해주세요.`;
   }
 
   try {
