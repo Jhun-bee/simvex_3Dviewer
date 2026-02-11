@@ -37,23 +37,13 @@ export function useModelLoader(machinery: Machinery) {
                 const part = machinery.parts[index];
                 const model = gltf.scene.clone(); // Clone to allow re-use if needed
 
-                // Enable shadows and apply color
+                // Enable shadows
                 model.traverse((child: any) => {
                     if (child instanceof THREE.Mesh) {
                         child.castShadow = true;
                         child.receiveShadow = true;
                         if (child.material) {
                             child.material.envMapIntensity = 1;
-
-                            // Apply custom color if specified in data
-                            if (part.color) {
-                                child.material.color.set(part.color);
-                                if (child.material instanceof THREE.MeshStandardMaterial) {
-                                    child.material.metalness = 0.7;
-                                    child.material.roughness = 0.3;
-                                }
-                            }
-
                             child.material.needsUpdate = true;
                         }
                     }
@@ -61,39 +51,63 @@ export function useModelLoader(machinery: Machinery) {
 
                 model.userData = { partName: part.name };
 
-                // Scale up the model
+                // 🎯 Hardcode scale to 100 for global consistency with machineData coordinates
                 const scale = 100;
                 model.scale.set(scale, scale, scale);
 
-                // Calculate Bounding Box to find the center offset (logical position)
-                // We must update the matrix world for the scales to apply before box calculation
-                // However, since the model is not in the scene graph yet, we update local matrix and use it.
-                model.updateMatrix();
+                // Enable shadows and apply high-quality materials
+                model.traverse((child: any) => {
+                    if (child instanceof THREE.Mesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
 
+                        // Create a NEW high-quality material
+                        const material = new THREE.MeshStandardMaterial({
+                            color: part.color ? new THREE.Color(part.color) : (child.material as THREE.MeshStandardMaterial).color,
+                            metalness: 0.85,
+                            roughness: 0.25,
+                            envMapIntensity: 1.0,
+                        });
+
+                        child.material = material;
+                        child.material.needsUpdate = true;
+                    }
+                });
+
+                // Apply initial rotation from data if available
+                if (part.rotation) {
+                    model.rotation.set(part.rotation[0], part.rotation[1], part.rotation[2]);
+                }
+
+                // 🎯 1. Calculate Bounding Box after scaling but BEFORE positioning
+                model.updateMatrixWorld(true);
                 const box = new THREE.Box3().setFromObject(model);
                 const center = new THREE.Vector3(0, 0, 0);
                 if (!box.isEmpty()) {
                     box.getCenter(center);
                 }
 
-                // Use explicit position from data if available, otherwise use calculated center
-                const explicitPos = part.position;
-                const x = explicitPos ? explicitPos[0] : center.x;
-                const y = explicitPos ? explicitPos[1] : center.y;
-                const z = explicitPos ? explicitPos[2] : center.z;
+                // 🎯 2. Centering: Mesh를 그룹의 로컬 원점[0,0,0]으로 강제 이동
+                // (모델링 툴에서의 좌표 오프셋을 상쇄하여 회전 축을 중앙으로 맞춤)
+                // Default to TRUE for Robot Arm compatibility, but can be disabled via data
+                const shouldCenter = part.centerMesh !== false;
+                if (shouldCenter) {
+                    model.position.set(-center.x, -center.y, -center.z);
+                } else {
+                    // if centering is off, use original exported offsets or assemblyOffset
+                    const assemblyOffset = part.assemblyOffset || [0, 0, 0];
+                    model.position.set(assemblyOffset[0], assemblyOffset[1], assemblyOffset[2]);
+                }
 
-                // Apply assembly offset for visual positioning
-                const assemblyOffset = part.assemblyOffset || [0, 0, 0];
-                model.position.set(assemblyOffset[0], assemblyOffset[1], assemblyOffset[2]);
+                // 🎯 3. Group Positioning: 그룹을 월드 좌표(machineryData)에 배치
+                // part.position이 있으면 그것을 쓰고, 없으면 원래의 center를 사용
+                const groupPos = part.position ? new THREE.Vector3(...part.position) : center;
 
-                // We wrap in a group to handle positioning cleanly if needed, 
-                // but here 'model' is the scene which is a Group usually.
-                // To be safe and consistent with previous logic:
                 const group = new THREE.Group();
                 group.add(model);
 
                 loadedModels.set(part.name, group);
-                positions.set(part.name, new THREE.Vector3(x, y, z));
+                positions.set(part.name, groupPos);
             });
 
             setModels(loadedModels);
