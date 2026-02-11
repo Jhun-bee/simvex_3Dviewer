@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [v0.6.0] - 2026-02-11
+
+### Changed
+- **데이터 구조 완전 모듈화**: `src/data/machinery/` 폴더로 각 기계 데이터를 독립 파일로 분리. 기계 간 간섭 없이 독립적인 좌표 튜닝 가능하도록 구조 리팩토링.
+
+### Added
+- **조건부 메쉬 센터링 (`centerMesh`)**: 각 부품별로 모델 바운딩 박스 중심 정렬 여부를 선택할 수 있는 옵션 추가.
+
+### Fixed
+- **v0.7.0 수준 정밀 조립 복원 (Golden State)**:
+  - **V4 Engine**: 원점 기준 정렬(`centerMesh: false`)로 복구하여 크랭크축과 피스톤의 정밀 공차 완벽 조립.
+  - **Suspension**: 사용자 요청에 따른 ROD/NUT 높이 재조정 (`y: 9.9`) 및 갭 제거.
+  - **Robot Arm**: 베이스 높이(`8.2`)를 고려한 전체 부품 상향 이동 및 사용자 확정 하드코딩 좌표 반영.
+
 ## [v0.5.5] - 2026-02-09
 
 ### Added
