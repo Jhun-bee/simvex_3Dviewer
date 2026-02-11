@@ -83,7 +83,7 @@ export async function sendMessageToAI(
     ];
 
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-5-mini',
       messages,
       temperature: 0.7,
       max_tokens: 500,

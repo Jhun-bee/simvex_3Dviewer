@@ -6,7 +6,7 @@ from functools import lru_cache
 class Settings(BaseSettings):
     # OpenAI
     openai_api_key: str = ""
-    openai_model: str = "gpt-4o-mini"  # Model to use for AI agents
+    openai_model: str = "gpt-5-mini"  # Model to use for AI agents
     openai_embedding_model: str = "text-embedding-3-small"  # Model for embeddings
 
     # Database

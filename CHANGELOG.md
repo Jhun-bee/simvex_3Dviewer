@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [v0.8.3] - 2026-02-11
+
+### Fixed
+- **LLM 모델명 복구**: 도사팀 전용 환경 사양에 맞춰 모델명을 다시 `gpt-5-mini`로 복구. (URL 보정 로직은 유지)
+
 ## [v0.8.2] - 2026-02-11
 
 ### Fixed
